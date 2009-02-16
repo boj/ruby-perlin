@@ -1,10 +1,10 @@
 require 'perlin'
 
-def print_data(seed, p, o)
+def print_data(seed, p, o, h, w)
   p = Perlin.new(seed, p, o)
   data = ''
-  for y in 1..8
-    for x in  1..16
+  for y in 1..h
+    for x in  1..w
       n = p.run(x, y)
       if n >= 0.9
         data += '^'
@@ -66,5 +66,5 @@ def create_html(seed, name, p, o)
   f.close
 end
 
-print_data(321, 1, 1)
-create_html(321, "perlin", 1, 8)
+print_data(123, 1.0, 1, 16, 32)
+#create_html(321, "perlin", 0.5, 1)

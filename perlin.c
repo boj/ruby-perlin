@@ -10,41 +10,14 @@ VALUE rb_cPerlin;
 
 static long seed = 0;
 
-typedef struct perlin_data {
-	VALUE seed;
-  VALUE persistence;
-  VALUE octave;
-} perlin_t;
-
-void perlin_mark(perlin_t* self)
-{
-  rb_gc_mark(self->persistence);
-  rb_gc_mark(self->octave);
-}
-
-void perlin_free(perlin_t* self)
-{
-  free(self);
-}
-
-VALUE perlin_allocate(VALUE klass)
-{
-  perlin_t *p = malloc(sizeof(perlin_t));
-  p->persistence = Qnil;
-  p->octave = Qnil;
-  return Data_Wrap_Struct(klass, perlin_mark, perlin_free, p);
-}
-
 /*
 The main initialize function which recieves the inputs persistence and octave.
 */
 VALUE Perlin_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
 {
-  perlin_t* perlin;
-  Data_Get_Struct(self, perlin_t, perlin);
-  perlin->persistence = persistence;
-  perlin->octave = octave;
-
+  rb_iv_set(self, "@persistence", persistence);
+	rb_iv_set(self, "@octave", NUM2INT(octave));
+	
 	seed = seed_value;
   
   return self;
@@ -58,7 +31,7 @@ float perlin_interpolate(float a, float b, float x)
 }
 
 float perlin_noise(int x, int y)
-{
+{	
   long n = x + y * 57;
   n = (n << 13) ^ n;
   return (1.0 - ((n * (n * n * 15731*seed + 789221*seed) + 1376312589*seed) & 0x7fffffff) / 1073741824.0);
@@ -66,8 +39,18 @@ float perlin_noise(int x, int y)
 
 float perlin_smooth_noise(int x, int y)
 {
-  float corners = (perlin_noise(x - 1, y - 1) + perlin_noise(x + 1, y - 1) + perlin_noise(x - 1, y + 1) + perlin_noise(x + 1, y + 1) ) / 16;
-  float sides   = (perlin_noise(x - 1, y) + perlin_noise(x + 1, y) + perlin_noise(x, y - 1) + perlin_noise(x, y + 1) ) /  8;
+  float corners = (
+		perlin_noise(x - 1, y - 1) + 
+		perlin_noise(x + 1, y - 1) + 
+		perlin_noise(x - 1, y + 1) + 
+		perlin_noise(x + 1, y + 1) 
+		) / 16;
+  float sides   = (
+		perlin_noise(x - 1, y) + 
+		perlin_noise(x + 1, y) + 
+		perlin_noise(x, y - 1) + 
+		perlin_noise(x, y + 1) 
+		) /  8;
   float center  =  perlin_noise(x, y) / 4;
   return corners + sides + center;
 }
@@ -96,11 +79,10 @@ Takes points (x, y) and returns a height (z)
 */
 VALUE perlin_run(VALUE self, VALUE x, VALUE y)
 {
-  float total = 0;
-  perlin_t* perlin;
-  Data_Get_Struct(self, perlin_t, perlin);
-  int p = NUM2INT(perlin->persistence);
-  int n = NUM2INT(perlin->octave);
+	float p = RFLOAT(rb_iv_get(self, "@persistence"))->value;
+	int n = rb_iv_get(self, "@octave");
+
+	float total = 0;
   
   int i;
   float frequency, amplitude;
@@ -140,8 +122,6 @@ VALUE perlin_return_chunk(VALUE self, VALUE start_x, VALUE start_y, VALUE size_x
 void Init_perlin() {
   
   rb_cPerlin = rb_define_class("Perlin", rb_cObject);
-  
-  rb_define_alloc_func(rb_cPerlin, perlin_allocate);
   
   rb_define_method(rb_cPerlin, "initialize", Perlin_init, 3);
   rb_define_method(rb_cPerlin, "run", perlin_run, 2);
