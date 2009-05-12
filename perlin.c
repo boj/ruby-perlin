@@ -23,53 +23,53 @@ VALUE Perlin_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
   return self;
 }
 
-float perlin_interpolate(float a, float b, float x)
+inline float perlin_interpolate(const float a, const float b, const float x)
 {
-  float ft = x * 3.1415927;
-  float f = (1 - cos(ft)) * 0.5;
+  const float ft = x * 3.1415927;
+  const float f = (1 - cos(ft)) * 0.5;
   return  a * (1 - f) + b * f;
 }
 
-float perlin_noise(int x, int y)
+inline float perlin_noise(const int x, const int y)
 {	
   long n = x + y * 57;
   n = (n << 13) ^ n;
   return (1.0 - ((n * (n * n * 15731*seed + 789221*seed) + 1376312589*seed) & 0x7fffffff) / 1073741824.0);
 }
 
-float perlin_smooth_noise(int x, int y)
+float perlin_smooth_noise(const int x, const int y)
 {
-  float corners = (
+  const float corners = (
 		perlin_noise(x - 1, y - 1) + 
 		perlin_noise(x + 1, y - 1) + 
 		perlin_noise(x - 1, y + 1) + 
 		perlin_noise(x + 1, y + 1) 
 		) / 16;
-  float sides   = (
+  const float sides   = (
 		perlin_noise(x - 1, y) + 
 		perlin_noise(x + 1, y) + 
 		perlin_noise(x, y - 1) + 
 		perlin_noise(x, y + 1) 
 		) /  8;
-  float center  =  perlin_noise(x, y) / 4;
+  const float center  =  perlin_noise(x, y) / 4;
   return corners + sides + center;
 }
 
-float perlin_interpolated_noise(float x, float y)
+float perlin_interpolated_noise(const float x, const float y)
 {
-  int integer_X    = (int)x;
-  float fractional_X = x - integer_X;
+  const int integer_X    = (int)x;
+  const float fractional_X = x - integer_X;
 
-  int integer_Y    = (int)y;
-  float fractional_Y = y - integer_Y;
+  const int integer_Y    = (int)y;
+  const float fractional_Y = y - integer_Y;
 
-  float v1 = perlin_smooth_noise(integer_X,     integer_Y);
-  float v2 = perlin_smooth_noise(integer_X + 1, integer_Y);
-  float v3 = perlin_smooth_noise(integer_X,     integer_Y + 1);
-  float v4 = perlin_smooth_noise(integer_X + 1, integer_Y + 1);
+  const float v1 = perlin_smooth_noise(integer_X,     integer_Y);
+  const float v2 = perlin_smooth_noise(integer_X + 1, integer_Y);
+  const float v3 = perlin_smooth_noise(integer_X,     integer_Y + 1);
+  const float v4 = perlin_smooth_noise(integer_X + 1, integer_Y + 1);
 
-  float i1 = perlin_interpolate(v1, v2, fractional_X);
-  float i2 = perlin_interpolate(v3, v4, fractional_X);
+  const float i1 = perlin_interpolate(v1, v2, fractional_X);
+  const float i2 = perlin_interpolate(v3, v4, fractional_X);
   
   return perlin_interpolate(i1, i2, fractional_Y);
 }
@@ -77,20 +77,19 @@ float perlin_interpolated_noise(float x, float y)
 /*
 Takes points (x, y) and returns a height (z)
 */
-VALUE perlin_run(VALUE self, VALUE x, VALUE y)
+VALUE perlin_run(VALUE self, const VALUE x, const VALUE y)
 {
-	float p = RFLOAT(rb_iv_get(self, "@persistence"))->value;
-	int n = rb_iv_get(self, "@octave");
-
+	const float p = RFLOAT(rb_iv_get(self, "@persistence"))->value;
+	const int n = rb_iv_get(self, "@octave");
 	float total = 0;
+	float frequency = 1., amplitude = 1.;
   
   int i;
-  float frequency, amplitude;
-  for (i = 0; i < n; i++)
+  for (i = 0; i < n; ++i)
   {
-    frequency = pow(2, i);
-    amplitude = pow(p, i);
-    total = total + perlin_interpolated_noise(NUM2INT(x) * frequency, NUM2INT(y) * frequency) * amplitude;
+    total += perlin_interpolated_noise(NUM2INT(x) * frequency, NUM2INT(y) * frequency) * amplitude;
+		frequency *= 2;
+		amplitude *= p;
   }
   
   return rb_float_new(total);
@@ -110,8 +109,7 @@ VALUE perlin_return_chunk(VALUE self, VALUE start_x, VALUE start_y, VALUE size_x
     VALUE row = rb_ary_new();
     for (j = NUM2INT(start_y); j < NUM2INT(size_y) + NUM2INT(start_y); j++)
     {
-      VALUE val = perlin_run(self, INT2NUM(i), INT2NUM(j));
-      rb_ary_push(row, val);
+      rb_ary_push(row, perlin_run(self, INT2NUM(i), INT2NUM(j)));
     }
     rb_ary_push(arr, row);
   }
