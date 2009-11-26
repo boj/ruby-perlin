@@ -1,10 +1,10 @@
 # Ruby Perlin
 
 A Ruby Perlin implementation based off
-http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
+<http://freespace.virgin.net/hugo.elias/models/m_perlin.htm>
 
-Written by Brian 'bojo' Jones <mojobojo@gmail.com>
-Optimizations thanks to Camille Goudeseune, Univ of Illinois, <cog@illinois.edu>
+- Written by Brian 'bojo' Jones <mojobojo@gmail.com>
+- Optimizations thanks to Camille Goudeseune, Univ of Illinois, <cog@illinois.edu>
 
 ## INSTALL
 
