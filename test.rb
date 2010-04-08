@@ -1,70 +1,23 @@
 require 'perlin'
 
-def print_data(seed, p, o, h, w)
+def print_data(seed, p, o, h, w, d)
   p = Perlin.new(seed, p, o)
   data = ''
-  for y in 1..h
-    for x in  1..w
-      n = p.run(x, y)
-      if n >= 0.9
-        data += '^'
-      elsif n < 0.9 and n > 0.7
-        data += '%'
-      elsif n < 0.7 and n > 0.5
-        data += '*'
-      elsif n < 0.5 and n > 0.3
-        data += '#'
-      elsif n < 0.3 and n > 0.1
-        data += '.'
-      elsif n < 0.1 and n > -0.1
-        data += ','
-      else
-        data += '~'
+  for z in 1..d
+    for x in 1..w
+      for y in 1..h
+        n = p.run3d(z, x, y)
+        s = "%.2f" % n
+        for i in 1..(5 - s.size)
+          s += " "
+        end
+        data += s
       end
+      data += "\n"
     end
-    data += "\n"
+    puts data
+    sleep(0.1)
   end
-  puts data
 end
 
-def create_html(seed, name, p, o)
-  p = Perlin.new(seed, p, o)
-  a = p.return_chunk(0, 0, 64, 64)
-  data = "<table>\n"
-  for r in a
-    data += "<tr>\n"
-    for z in r
-      if z >= 0.9
-        color = "brown"
-        symbol = "^"
-      elsif z < 0.9 and z > 0.7
-        color = "orange"
-        symbol = "%"
-      elsif z < 0.7 and z > 0.5
-        color = "red"
-        symbol = "*"
-      elsif z < 0.5 and z > 0.3
-        color = "yellow"
-        symbol = "#"
-      elsif z < 0.3 and z > 0.1
-        color = "lightgreen"
-        symbol = "."
-      elsif z < 0.1 and z > -0.1
-        color = "green"
-        symbol = ","
-      elsif z < -0.1
-        color = "blue"
-        symbol = "~"
-      end
-      data += "<td style=\"background-color: %s; width: 10px; height: 10px;\""">%s</td>\n" % [color, symbol]
-    end
-    data += "</tr>\n"
-  end
-  data += "</table>\n"
-  f = File.open("#{name}.html", "w")
-  f.write(data)
-  f.close
-end
-
-print_data(123, 1.0, 1, 16, 32)
-#create_html(321, "perlin", 0.5, 1)
+print_data(5, 1.0, 1, 10, 66, 100)
