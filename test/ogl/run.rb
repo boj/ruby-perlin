@@ -1,4 +1,4 @@
-require '../../perlin'
+require 'perlin'
 require 'rubygems'
 require 'fox16'
 
@@ -12,27 +12,29 @@ class GLTestWindow < FXMainWindow
   TIMER_INTERVAL = 100
   
   def drawTerrain(width, length)
-    p = Perlin.new(rand(1000), 0.5, 1)
-    for x in -width..width
-      for y in -length..length
+    p = Perlin.new(@p_seed.to_s.to_i, @p_octave.to_s.to_f, @p_freq.to_s.to_i)
+    
+    GL.Begin(GL::TRIANGLE_STRIP)
+    for x in 0..width
+      for y in 0..length
         z = p.run(x, y)
-        GL.Begin(GL::TRIANGLE_STRIP)
-          GL.Normal(0.0, 0.0, 0.0)
-          GL.Vertex(x.to_f, y.to_f, z.to_f)
-          GL.Vertex(x.to_f, y.to_f + 1.0, z.to_f)
-          GL.Vertex(x.to_f + 1.0, y.to_f, z.to_f)
-          GL.Vertex(x.to_f + 1.0, y.to_f + 1.0, z.to_f)
-        GL.End()
+        material = [rand, rand, rand]
+        GL.Material(GL::FRONT, GL::AMBIENT, material)
+        GL.Material(GL::FRONT, GL::DIFFUSE, material)
+        GL.Vertex(x + 1, y + 1, z)
+        GL.Vertex(x - 1, y + 1, z)
+        GL.Vertex(x + 1, y - 1, z)
+        GL.Vertex(x - 1, y - 1, z)
       end
     end
+    GL.End()
   end
 
   # Draw the GL scene
   def drawScene
-    lightPosition = [15.0, 10.0, 5.0, 1.0]
+    lightPosition = [5.0, 5.0, 5.0, 1.0]
     lightAmbient  = [ 0.5,  0.5, 0.5, 1.0]
     lightDiffuse  = [ 0.9,  0.9, 0.9, 1.0]
-    blueMaterial  = [ 0.0,  0.0, 1.0, 1.0]
   
     width = @glcanvas.width.to_f
     height = @glcanvas.height.to_f
@@ -55,7 +57,9 @@ class GLTestWindow < FXMainWindow
   
     GL.MatrixMode(GL::MODELVIEW)
     GL.LoadIdentity()
-    GLU.LookAt(0.0, 15.0, 10.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0)
+    x = (@p_width.to_s.to_i / 2.0)
+    y = (@p_length.to_s.to_i / 2.0)
+    GLU.LookAt(5.0, 15.0, 5.0, x, y, 0.0, 0.0, -1.0, 0.0)
   
     GL.ShadeModel(GL::SMOOTH)
     GL.Light(GL::LIGHT0, GL::POSITION, lightPosition)
@@ -64,12 +68,8 @@ class GLTestWindow < FXMainWindow
     GL.Enable(GL::LIGHT0)
     GL.Enable(GL::LIGHTING)
   
-    GL.Material(GL::FRONT, GL::AMBIENT, blueMaterial)
-    GL.Material(GL::FRONT, GL::DIFFUSE, blueMaterial)
-  
     GL.PushMatrix()
-    GL.Rotated(0.0, 0.0, 1.0, 0.0)
-    drawTerrain(10, 10)
+    drawTerrain(@p_width.to_s.to_i, @p_length.to_s.to_i)
     GL.PopMatrix()
   
     # Swap if it is double-buffered
@@ -82,6 +82,12 @@ class GLTestWindow < FXMainWindow
   end
 
   def initialize(app)
+    @p_seed   = FXDataTarget.new(rand(100))
+    @p_octave = FXDataTarget.new(1.0)
+    @p_freq   = FXDataTarget.new(1)
+    @p_width  = FXDataTarget.new(10)
+    @p_length = FXDataTarget.new(10)
+    
     # Invoke the base class initializer
     super(app, "Perlin Visualizer", :opts => DECOR_ALL, :width => 800, :height => 600)
 
@@ -125,10 +131,41 @@ class GLTestWindow < FXMainWindow
       :opts => FRAME_THICK | FRAME_RAISED | LAYOUT_FILL_X | LAYOUT_TOP | LAYOUT_LEFT
     )
     redrawBtn.connect(SEL_COMMAND) do
+      x = (@p_width.to_s.to_i / 2.0)
+      y = (@p_length.to_s.to_i / 2.0)
+      GLU.LookAt(0.0, 0.0, 10.0, x, y, 0.0, 0.0, 1.0, 0.0)
       drawScene
     end
     redrawBtn.padLeft, redrawBtn.padRight = 10, 10
     redrawBtn.padTop, redrawBtn.padBottom = 5, 5
+    
+    # Redraw button
+    redrawRndBtn = FXButton.new(
+      buttonFrame,
+      "&Redraw Random\tRedraw the screen after changing the seed",
+      :opts => FRAME_THICK | FRAME_RAISED | LAYOUT_FILL_X | LAYOUT_TOP | LAYOUT_LEFT
+    )
+    redrawRndBtn.connect(SEL_COMMAND) do
+      @p_seed   = FXDataTarget.new(rand(100))
+      drawScene
+    end
+    redrawRndBtn.padLeft, redrawRndBtn.padRight = 10, 10
+    redrawRndBtn.padTop, redrawRndBtn.padBottom = 5, 5
+    
+    FXLabel.new(buttonFrame, "Seed", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_seed, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
+    
+    FXLabel.new(buttonFrame, "Octave", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_octave, FXDataTarget::ID_VALUE, TEXTFIELD_REAL | LAYOUT_FILL_ROW)
+    
+    FXLabel.new(buttonFrame, "Frequency", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_freq, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
+    
+    FXLabel.new(buttonFrame, "Width", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_width, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
+    
+    FXLabel.new(buttonFrame, "Length", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_length, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
     
     # Exit button
     exitBtn = FXButton.new(

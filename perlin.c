@@ -44,13 +44,13 @@ float perlin_smooth_noise(const int x, const int y)
 		perlin_noise(x + 1, y - 1) +
 		perlin_noise(x - 1, y + 1) +
 		perlin_noise(x + 1, y + 1)
-		) / 16;
+		) / 4;
 	const float sides   = (
 		perlin_noise(x - 1, y) +
 		perlin_noise(x + 1, y) +
 		perlin_noise(x, y - 1) +
 		perlin_noise(x, y + 1)
-		) /  8;
+		) /  4;
 	const float center  =  perlin_noise(x, y) / 4;
 	return corners + sides + center;
 }
