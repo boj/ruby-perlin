@@ -12,19 +12,18 @@ class GLTestWindow < FXMainWindow
   TIMER_INTERVAL = 100
   
   def drawTerrain(width, length)
-    p = Perlin.new(@p_seed.to_s.to_i, @p_octave.to_s.to_f, @p_freq.to_s.to_i)
+    p = Perlin.new(@p_seed.to_s.to_i, @p_freq.to_s.to_f, @p_octave.to_s.to_i)
     
-    GL.Begin(GL::TRIANGLE_STRIP)
+    GL.Begin(GL::QUADS)
     for x in 0..width
       for y in 0..length
-        z = p.run(x, y)
         material = [rand, rand, rand]
         GL.Material(GL::FRONT, GL::AMBIENT, material)
         GL.Material(GL::FRONT, GL::DIFFUSE, material)
-        GL.Vertex(x + 1, y + 1, z)
-        GL.Vertex(x - 1, y + 1, z)
-        GL.Vertex(x + 1, y - 1, z)
-        GL.Vertex(x - 1, y - 1, z)
+        GL.Vertex(x, y, p.run(x, y))
+        GL.Vertex(x + 1, y, p.run(x + 1, y))
+        GL.Vertex(x + 1, y + 1, p.run(x + 1, y + 1))
+        GL.Vertex(x, y + 1, p.run(x, y + 1))
       end
     end
     GL.End()
@@ -83,8 +82,8 @@ class GLTestWindow < FXMainWindow
 
   def initialize(app)
     @p_seed   = FXDataTarget.new(rand(100))
-    @p_octave = FXDataTarget.new(1.0)
-    @p_freq   = FXDataTarget.new(1)
+    @p_freq   = FXDataTarget.new(1.0)
+    @p_octave = FXDataTarget.new(1)
     @p_width  = FXDataTarget.new(10)
     @p_length = FXDataTarget.new(10)
     
@@ -155,11 +154,11 @@ class GLTestWindow < FXMainWindow
     FXLabel.new(buttonFrame, "Seed", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
     FXTextField.new(buttonFrame, 10, @p_seed, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
     
-    FXLabel.new(buttonFrame, "Octave", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
-    FXTextField.new(buttonFrame, 10, @p_octave, FXDataTarget::ID_VALUE, TEXTFIELD_REAL | LAYOUT_FILL_ROW)
-    
     FXLabel.new(buttonFrame, "Frequency", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
-    FXTextField.new(buttonFrame, 10, @p_freq, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_freq, FXDataTarget::ID_VALUE, TEXTFIELD_REAL | LAYOUT_FILL_ROW)
+    
+    FXLabel.new(buttonFrame, "Octave", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
+    FXTextField.new(buttonFrame, 10, @p_octave, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
     
     FXLabel.new(buttonFrame, "Width", nil, LAYOUT_CENTER_Y | LAYOUT_CENTER_X | JUSTIFY_RIGHT | LAYOUT_FILL_ROW)
     FXTextField.new(buttonFrame, 10, @p_width, FXDataTarget::ID_VALUE, TEXTFIELD_INTEGER | LAYOUT_FILL_ROW)
