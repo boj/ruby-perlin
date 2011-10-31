@@ -15,6 +15,7 @@ The main initialize function which recieves the inputs persistence and octave.
 */
 VALUE Perlin_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
 {
+  persistence = rb_funcall(persistence, rb_intern("to_f"), 0);
 	rb_iv_set(self, "@persistence", persistence);
 	rb_iv_set(self, "@octave", NUM2INT(octave));
 
@@ -147,7 +148,7 @@ Takes points (x, y) and returns a height (n)
 */
 VALUE perlin_run(VALUE self, const VALUE x, const VALUE y)
 {
-	const float p = RFLOAT(rb_iv_get(self, "@persistence"))->value;
+	const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
 	const int n = rb_iv_get(self, "@octave");
 	float total = 0.;
 	float frequency = 1., amplitude = 1.;
@@ -167,7 +168,7 @@ Takes points (x, y, z) and returns a height (n)
 */
 VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 {
-	const float p = RFLOAT(rb_iv_get(self, "@persistence"))->value;
+	const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
 	const int n = rb_iv_get(self, "@octave");
 	float total = 0.;
 	float frequency = 1., amplitude = 1.;
