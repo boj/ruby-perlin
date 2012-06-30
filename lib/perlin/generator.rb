@@ -7,7 +7,7 @@ module Perlin
   # @!attribute [r] octave
   #   @return [Integer]
   class Generator
-    attr_reader :octave, :persistence
+    attr_reader :seed, :octave, :persistence
 
     # @!method initialize(seed, persistence, octave)
     #   Create a noise generator.

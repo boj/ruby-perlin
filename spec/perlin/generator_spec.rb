@@ -6,6 +6,21 @@ describe Perlin::Generator do
     @perlin = Perlin::Generator.new 123, 1.5, 2
   end
 
+  it "should have seed set correctly" do
+    @perlin.seed.should eq 123
+    @perlin.seed.should be_kind_of Integer
+  end
+
+  it "should have seed set uniquely on all generators" do
+    # This was a bug in the original code!
+    g = Perlin::Generator.new 99, 1, 1
+    g.seed.should eq 99
+    g.seed.should be_kind_of Integer
+
+    @perlin.seed.should eq 123
+    g[0, 0].should_not eq @perlin[0, 0]
+  end
+
   it "should have persistence set correctly" do
     @perlin.persistence.should eq 1.5
   end
@@ -26,13 +41,13 @@ describe Perlin::Generator do
 
     describe "[](x, y)" do
       it "should return the appropriate value" do
-        @perlin[0, 0].should eq 0.5729669332504272
+        @perlin[0, 0].should eq -1.0405873507261276
       end
     end
 
     describe "[](x, y, z)" do
       it "should return the appropriate value" do
-        @perlin[0, 0, 0].should eq 0.4035601392388344
+        @perlin[0, 0, 0].should eq -1.5681833028793335
       end
     end
   end
@@ -41,12 +56,7 @@ describe Perlin::Generator do
     describe "chunk(x, y, size_x, size_y)" do
       it "should return the appropriate values" do
         chunk = @perlin.chunk 1, 2, 3, 4
-        chunk.should eq [
-                            [0.23042351007461548, 1.1444950252771378, -0.18201526999473572, 0.10285091400146484],
-                            [-0.7967360764741898, -2.9295682907104492e-05, 0.009638801217079163, 1.5842265486717224],
-                            [-0.8445602059364319, -0.08269979804754257, -0.15433502569794655, 0.7924925200641155]
-                        ]
-
+        chunk.should eq [[-2.014809340238571, -0.7094215080142021, -0.5946878045797348, 0.4915006756782532], [-1.4068767204880714, -0.732808068394661, 0.07362580299377441, -0.325466126203537], [-0.857817449606955, -1.940980076789856, -0.5687579363584518, 1.4209578335285187]]
       end
 
       it "should fail if given negative size_x" do
@@ -61,18 +71,7 @@ describe Perlin::Generator do
     describe "chunk(x, y, z, size_x, size_y, size_z)" do
       it "should return the appropriate values" do
         chunk = @perlin.chunk 6, 5, 4, 3, 2, 1
-        chunk.should eq [
-                            [
-                                [-0.32017043232917786], [-0.5810140073299408]
-                            ],
-                            [
-                                [-0.4722275957465172], [1.1914344131946564]
-                            ],
-                            [
-                                [1.1328794583678246], [1.338328868150711]
-                            ]
-                        ]
-
+        chunk.should eq [[[0.7522532045841217], [0.3314518630504608]], [[0.3198353797197342], [0.967293307185173]], [[1.1024393141269684], [0.5659154206514359]]]
       end
 
       it "should fail if given negative size_x" do

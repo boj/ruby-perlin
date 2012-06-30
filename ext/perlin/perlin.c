@@ -6,20 +6,18 @@ located at http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
 #include "ruby.h"
 #include "math.h"
 
-VALUE rb_cPerlin;
+static VALUE rb_cPerlin;
 
 static long seed = 0;
 
 /*
 The main initialize function which receives the inputs persistence and octave.
 */
-VALUE perlin_generator_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
+VALUE Perlin_Generator_init(VALUE self, VALUE seed, VALUE persistence, VALUE octave)
 {
-    persistence = rb_funcall(persistence, rb_intern("to_f"), 0);
-    rb_iv_set(self, "@persistence", persistence);
-    rb_iv_set(self, "@octave", octave);
-
-    seed = seed_value;
+    rb_iv_set(self, "@seed",        rb_funcall(seed,        rb_intern("to_i"), 0));
+    rb_iv_set(self, "@persistence", rb_funcall(persistence, rb_intern("to_f"), 0));
+    rb_iv_set(self, "@octave",      rb_funcall(octave,      rb_intern("to_i"), 0));
 
     return self;
 }
@@ -146,13 +144,16 @@ float perlin_interpolated_noise_3d(const float x, const float y, const float z)
 /*
 Takes points (x, y) and returns a height (n)
 */
-VALUE perlin_generator_run2d(VALUE self, const VALUE x, const VALUE y)
+VALUE Perlin_Generator_run2d(VALUE self, const VALUE x, const VALUE y)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
     float total = 0.;
     float frequency = 1., amplitude = 1.;
     int i;
+
+    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+
     for (i = 0; i < n; ++i)
     {
         total += perlin_interpolated_noise(NUM2INT(x) * frequency, NUM2INT(y) * frequency) * amplitude;
@@ -166,13 +167,16 @@ VALUE perlin_generator_run2d(VALUE self, const VALUE x, const VALUE y)
 /*
 Takes points (x, y, z) and returns a height (n)
 */
-VALUE perlin_generator_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
+VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
     float total = 0.;
     float frequency = 1., amplitude = 1.;
     int i;
+
+    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+
     for (i = 0; i < n; ++i)
     {
         total += perlin_interpolated_noise_3d(NUM2INT(x) * frequency, NUM2INT(y) * frequency, NUM2INT(z) * frequency) * amplitude;
@@ -186,7 +190,7 @@ VALUE perlin_generator_run3d(VALUE self, const VALUE x, const VALUE y, const VAL
 /*
 Returns a chunk of coordinates starting from x, y and of size size_x, size_y.
 */
-VALUE perlin_generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
+VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
 {
     VALUE arr = rb_ary_new();
     int i, j;
@@ -195,7 +199,7 @@ VALUE perlin_generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE
         VALUE row = rb_ary_new();
         for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
         {
-            rb_ary_push(row, perlin_generator_run2d(self, INT2NUM(i), INT2NUM(j)));
+            rb_ary_push(row, Perlin_Generator_run2d(self, INT2NUM(i), INT2NUM(j)));
         }
         rb_ary_push(arr, row);
     }
@@ -205,7 +209,7 @@ VALUE perlin_generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE
 /*
 Returns a chunk of coordinates starting from x, y, z and of size size_x, size_y, size_z.
 */
-VALUE perlin_generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
+VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
 {
     VALUE arr = rb_ary_new();
     int i, j, k;
@@ -217,7 +221,7 @@ VALUE perlin_generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size
             VALUE column = rb_ary_new();
             for (k = NUM2INT(z); k < NUM2INT(size_z) + NUM2INT(z); k++)
             {
-                rb_ary_push(column, perlin_generator_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
+                rb_ary_push(column, Perlin_Generator_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
             }
             rb_ary_push(row, column);
         }
@@ -230,10 +234,11 @@ void Init_perlin() {
     VALUE jm_Module = rb_define_module("Perlin");
     VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Generator", rb_cObject);
 
-    rb_define_method(rb_cPerlin, "initialize", perlin_generator_init, 3);
-    rb_define_method(rb_cPerlin, "run2d", perlin_generator_run2d, 2);
-    rb_define_method(rb_cPerlin, "run3d", perlin_generator_run3d, 3);
-    rb_define_method(rb_cPerlin, "chunk2d", perlin_generator_chunk2d, 4);
-    rb_define_method(rb_cPerlin, "chunk3d", perlin_generator_chunk3d, 6);
+    rb_define_method(rb_cPerlin, "initialize", Perlin_Generator_init, 3);
+
+    rb_define_method(rb_cPerlin, "run2d", Perlin_Generator_run2d, 2);
+    rb_define_method(rb_cPerlin, "run3d", Perlin_Generator_run3d, 3);
+    rb_define_method(rb_cPerlin, "chunk2d", Perlin_Generator_chunk2d, 4);
+    rb_define_method(rb_cPerlin, "chunk3d", Perlin_Generator_chunk3d, 6);
 }
 
