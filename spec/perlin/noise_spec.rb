@@ -60,22 +60,30 @@ describe Perlin::Noise do
 
     describe "chunk(x, y, z, size_x, size_y, size_z)" do
       it "should return the appropriate values" do
-        pending "implementation"
-        chunk = @noise.chunk 1, 2, 3, 4, 5, 6
+        chunk = @noise.chunk 6, 5, 4, 3, 2, 1
+        chunk.should eq [
+                            [
+                                [-0.32017043232917786], [-0.5810140073299408]
+                            ],
+                            [
+                                [-0.4722275957465172], [1.1914344131946564]
+                            ],
+                            [
+                                [1.1328794583678246], [1.338328868150711]
+                            ]
+                        ]
+
       end
 
       it "should fail if given negative size_x" do
-        pending "implementation"
         ->{ @noise.chunk 0, 0, 0, -1, 0, 0 }.should raise_error ArgumentError
       end
 
       it "should fail if given negative size_y" do
-        pending "implementation"
         ->{ @noise.chunk 0, 0, 0, 0, -1, 0 }.should raise_error ArgumentError
       end
 
       it "should fail if given negative size_z" do
-        pending "implementation"
         ->{ @noise.chunk 0, 0, 0, 0, 0, -1 }.should raise_error ArgumentError
       end
     end

@@ -30,15 +30,38 @@ class Noise
   #
   #   @param x [Integer]
   #   @param y [Integer]
-  #   @param width [Integer]
-  #   @param height [Integer]
+  #   @param size_x [Integer]
+  #   @param size_y [Integer]
+  #   @return [Array<Array<Float>>] height (n) values within the rectangle.
+  #
+  # @overload chunk(x, y, z, size_x, size_y, size_z)
+  #   Calculates a rectangular section of height (n) values and returns them as a 3D array.
+  #
+  #   This is much faster than accessing each point separately using {#[]}
+  #
+  #   @example
+  #     noise = Perlin::Noise.new 123, 1.0, 1
+  #     arr = noise.chunk 6, 5, 4, 3, 2, 1
+  #
+  #     # access position 2, 1, 0 (remember that arr is offset by the x, y and z value of the chunk)
+  #     puts arr[2, 1, 0] #=>
+  #
+  #     p arr  #= >
+  #
+  #   @param x [Integer]
+  #   @param y [Integer]
+  #   @param z [Integer]
+  #   @param size_x [Integer]
+  #   @param size_y [Integer]
+  #   @param size_z [Integer]
   #   @return [Array<Array<Float>>] height (n) values within the rectangle.
   def chunk(*args)
     case args.size
       when 6
-        raise ImplementationError, "3d noise is not supported in chunks yet"
+        raise ArgumentError, "Can't have negative size_x, size_y or size_y" if args[3] < 0 || args[4] < 0 ||  args[5] < 0
+        chunk3d *args
       when 4
-        raise ArgumentError, "Can't have negative size_x or size_y" if args[2] < 0 or args[3] < 0
+        raise ArgumentError, "Can't have negative size_x or size_y" if args[2] < 0 ||  args[3] < 0
         chunk2d *args
       else
         raise ArgumentError, "#{args.size} dimensional noise generation is not supported for chunks. 2D only, using (x, y, width, height)"

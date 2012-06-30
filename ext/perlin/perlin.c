@@ -17,7 +17,7 @@ VALUE Perlin_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
 {
     persistence = rb_funcall(persistence, rb_intern("to_f"), 0);
     rb_iv_set(self, "@persistence", persistence);
-    rb_iv_set(self, "@octave", NUM2INT(octave));
+    rb_iv_set(self, "@octave", octave);
 
     seed = seed_value;
 
@@ -149,7 +149,7 @@ Takes points (x, y) and returns a height (n)
 VALUE perlin_run2d(VALUE self, const VALUE x, const VALUE y)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
-    const int n = rb_iv_get(self, "@octave");
+    const int n = NUM2INT(rb_iv_get(self, "@octave"));
     float total = 0.;
     float frequency = 1., amplitude = 1.;
     int i;
@@ -169,7 +169,7 @@ Takes points (x, y, z) and returns a height (n)
 VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
-    const int n = rb_iv_get(self, "@octave");
+    const int n = NUM2INT(rb_iv_get(self, "@octave"));
     float total = 0.;
     float frequency = 1., amplitude = 1.;
     int i;
@@ -202,6 +202,30 @@ VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
     return arr;
 }
 
+/*
+Returns a chunk of coordinates starting from x, y, z and of size size_x, size_y, size_z.
+*/
+VALUE perlin_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
+{
+    VALUE arr = rb_ary_new();
+    int i, j, k;
+    for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+    {
+        VALUE row = rb_ary_new();
+        for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+        {
+            VALUE column = rb_ary_new();
+            for (k = NUM2INT(z); k < NUM2INT(size_z) + NUM2INT(z); k++)
+            {
+                rb_ary_push(column, perlin_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
+            }
+            rb_ary_push(row, column);
+        }
+        rb_ary_push(arr, row);
+    }
+    return arr;
+}
+
 void Init_perlin() {
     VALUE jm_Module = rb_define_module("Perlin");
     VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Noise", rb_cObject);
@@ -210,5 +234,6 @@ void Init_perlin() {
     rb_define_method(rb_cPerlin, "run2d", perlin_run2d, 2);
     rb_define_method(rb_cPerlin, "run3d", perlin_run3d, 3);
     rb_define_method(rb_cPerlin, "chunk2d", perlin_chunk2d, 4);
+    rb_define_method(rb_cPerlin, "chunk3d", perlin_chunk3d, 6);
 }
 

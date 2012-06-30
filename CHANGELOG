@@ -2,3 +2,9 @@
 -----
 
 * Converted to gem (previously was just a .c file)
+* Added 3D chunks.
+* Added Noise#[x, y]
+* Added Noise#[x, y, z]
+* Added Noise#chunk x, y, size_x, size_y
+* Added Noise#chunk x, y, z, size_x, size_y, size_z
+* Added Noise#persistence and Noise#octave accessors.
