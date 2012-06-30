@@ -12,7 +12,8 @@ Gem::Specification.new do |s|
   s.description = <<-END
 #{s.summary}
 
-A Ruby Perlin implementation based off http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
+A Perlin noise implementation based of
+<http://freespace.virgin.net/hugo.elias/models/m_perlin.htm>. Implemented as a Ruby C extension.
 
 Written by Brian 'bojo' Jones (mojobojo@gmail.com)
 Optimizations thanks to Camille Goudeseune, Univ of Illinois, (cog@illinois.edu)
