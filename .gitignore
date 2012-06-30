@@ -2,3 +2,7 @@
 .yardoc/
 doc/
 *.gem
+/lib/perlin.so
+pkg/
+tmp/
+/lib/perlin/perlin.so

@@ -146,7 +146,7 @@ float perlin_interpolated_noise_3d(const float x, const float y, const float z)
 /*
 Takes points (x, y) and returns a height (n)
 */
-VALUE perlin_run(VALUE self, const VALUE x, const VALUE y)
+VALUE perlin_run2d(VALUE self, const VALUE x, const VALUE y)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = rb_iv_get(self, "@octave");
@@ -186,7 +186,7 @@ VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 /*
 Returns a chunk of coordinates starting from x, y and of size width, height.
 */
-VALUE perlin_chunk(VALUE self, VALUE x, VALUE y, VALUE width, VALUE height)
+VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE width, VALUE height)
 {
     VALUE arr = rb_ary_new();
     int i, j;
@@ -195,7 +195,7 @@ VALUE perlin_chunk(VALUE self, VALUE x, VALUE y, VALUE width, VALUE height)
         VALUE row = rb_ary_new();
         for (j = NUM2INT(y); j < NUM2INT(height) + NUM2INT(y); j++)
         {
-            rb_ary_push(row, perlin_run(self, INT2NUM(i), INT2NUM(j)));
+            rb_ary_push(row, perlin_run2d(self, INT2NUM(i), INT2NUM(j)));
         }
         rb_ary_push(arr, row);
     }
@@ -207,9 +207,8 @@ void Init_perlin() {
     VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Noise", rb_cObject);
 
     rb_define_method(rb_cPerlin, "initialize", Perlin_init, 3);
-    rb_define_method(rb_cPerlin, "run", perlin_run, 2);
-    rb_define_method(rb_cPerlin, "run2d", perlin_run, 2);
+    rb_define_method(rb_cPerlin, "run2d", perlin_run2d, 2);
     rb_define_method(rb_cPerlin, "run3d", perlin_run3d, 3);
-    rb_define_method(rb_cPerlin, "chunk", perlin_chunk, 4);
+    rb_define_method(rb_cPerlin, "chunk2d", perlin_chunk2d, 4);
 }
 

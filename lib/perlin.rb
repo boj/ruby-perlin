@@ -1,38 +1,47 @@
-require 'perlin/perlin'
+$LOAD_PATH.unshift File.expand_path("../perlin", __FILE__)
+require 'version'
 
+require 'perlin.so'
 
 module Perlin
 # Perlin noise generator.
 #
-# @!attribute [r] octaves
-#   @return [Integer] Number of octaves
-#
 # @!attribute [r] persistence
-#   @return [Float] Persistence
+#   @return [Float]
+#
+# @!attribute [r] octave
+#   @return [Integer]
 class Noise
-  attr_reader :octaves, :persistence
+  attr_reader :octave, :persistence
 
-  # @!method chunk(x, y, width, height)
+  # @overload chunk(x, y, width, height)
   #   Calculates a rectangular section of height (n) values and returns them as a 2D array.
   #
   #   This is much faster than accessing each point separately using {#[]}
   #
   #   @example
-  #     noise = Perlin::Noise.new 123, 1, 1
+  #     noise = Perlin::Noise.new 123, 1.0, 1
   #     arr = noise.chunk 1, 1, 2, 3
   #
   #     # access position 1, 2 (remember that arr is offset by the x, y value of the chunk)
   #     puts arr[0, 1] #=> -0.2208995521068573
   #
-  #     p arr  #= > [[0.05753844603896141, -0.2208995521068573, 0.3973901569843292],
-  #            #     [0.1383310854434967, -0.22248442471027374, 0.15600799024105072]]
+  #     p arr  #= > [[0.05753844603896141, -0.2208995521068573, 0.3973901569843292], [0.1383310854434967, -0.22248442471027374, 0.15600799024105072]]
   #
   #   @param x [Integer]
   #   @param y [Integer]
   #   @param width [Integer]
   #   @param height [Integer]
   #   @return [Array<Array<Float>>] height (n) values within the rectangle.
-
+  def chunk(*args)
+    case args.size
+      when 4
+        raise ArgumentError, "Can't have negative height or width" if args[2] < 0 or args[3] < 0
+        chunk2d *args
+      else
+        raise ArgumentError, "#{args.size} dimensional noise generation is not supported for chunks. 2D only, using (x, y, width, height)"
+    end
+  end
 
   # Gets height (n) at a point in 2D or 3D space.
   #
@@ -42,7 +51,7 @@ class Noise
   #   Gets height (n) value at a specific 2D position.
   #
   #   @example
-  #     noise = Perlin::Noise.new 123, 1, 1
+  #     noise = Perlin::Noise.new 123, 1.0, 1
   #
   #     # Returns a 'height' value for (x, y)
   #     puts noise[10, 20]  #=> 0.9004574418067932
@@ -55,7 +64,7 @@ class Noise
   #   Gets height (n) value at a specific 3D position.
   #
   #   @example
-  #     noise = Perlin::Noise.new 123, 1, 1
+  #     noise = Perlin::Noise.new 123, 1.0, 1
   #
   #     # Returns a 'height' value for (x, y, z)
   #     puts noise[10, 20, 30]  #=> 0.017745036631822586
@@ -75,8 +84,6 @@ class Noise
     end
   end
 
-  # Run should really run based on the number of parameters, so lets just do that!
-  remove_method :run
   alias_method :run, :[]
 end
 end
