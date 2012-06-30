@@ -19,7 +19,7 @@ USAGE
     require 'perlin'
 
     # Takes values seed, persistence, and octaves
-    noise = Perlin.new 123, 1, 1
+    noise = Perlin::Noise.new 123, 1, 1
 
     # Returns a 'height' value for (x, y)
     puts noise[10, 20]  #=> 0.9004574418067932

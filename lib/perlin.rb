@@ -1,25 +1,25 @@
 require 'perlin/perlin'
 
-# Perlin noise generator
+
+module Perlin
+# Perlin noise generator.
 #
 # @!attribute [r] octaves
 #   @return [Integer] Number of octaves
 #
 # @!attribute [r] persistence
 #   @return [Float] Persistence
-class Perlin
+class Noise
   attr_reader :octaves, :persistence
 
-  alias_method :chunk, :return_chunk
-
-  # @!method return_chunk(x, y, width, height)
+  # @!method chunk(x, y, width, height)
   #   Calculates a rectangular section of height (n) values and returns them as a 2D array.
   #
   #   This is much faster than accessing each point separately using {#[]}
   #
   #   @example
-  #     noise = Perlin.new 123, 1, 1
-  #     arr = noise.return_chunk 1, 1, 2, 3
+  #     noise = Perlin::Noise.new 123, 1, 1
+  #     arr = noise.chunk 1, 1, 2, 3
   #
   #     # access position 1, 2 (remember that arr is offset by the x, y value of the chunk)
   #     puts arr[0, 1] #=> -0.2208995521068573
@@ -42,7 +42,7 @@ class Perlin
   #   Gets height (n) value at a specific 2D position.
   #
   #   @example
-  #     noise = Perlin.new 123, 1, 1
+  #     noise = Perlin::Noise.new 123, 1, 1
   #
   #     # Returns a 'height' value for (x, y)
   #     puts noise[10, 20]  #=> 0.9004574418067932
@@ -55,7 +55,7 @@ class Perlin
   #   Gets height (n) value at a specific 3D position.
   #
   #   @example
-  #     noise = Perlin.new 123, 1, 1
+  #     noise = Perlin::Noise.new 123, 1, 1
   #
   #     # Returns a 'height' value for (x, y, z)
   #     puts noise[10, 20, 30]  #=> 0.017745036631822586
@@ -71,11 +71,12 @@ class Perlin
       when 2
         run2d *args
       else
-        raise "#{args.size} dimensional noise generation is not supported (2D and 3D are)"
+        raise ArgumentError, "#{args.size} dimensional noise generation is not supported (2D and 3D are)"
     end
   end
 
-  # Run should really run based on the number of parameters!
+  # Run should really run based on the number of parameters, so lets just do that!
   remove_method :run
   alias_method :run, :[]
+end
 end

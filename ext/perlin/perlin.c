@@ -186,7 +186,7 @@ VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 /*
 Returns a chunk of coordinates starting from x, y and of size width, height.
 */
-VALUE perlin_return_chunk(VALUE self, VALUE x, VALUE y, VALUE width, VALUE height)
+VALUE perlin_chunk(VALUE self, VALUE x, VALUE y, VALUE width, VALUE height)
 {
     VALUE arr = rb_ary_new();
     int i, j;
@@ -203,12 +203,13 @@ VALUE perlin_return_chunk(VALUE self, VALUE x, VALUE y, VALUE width, VALUE heigh
 }
 
 void Init_perlin() {
-    rb_cPerlin = rb_define_class("Perlin", rb_cObject);
+    VALUE jm_Module = rb_define_module("Perlin");
+    VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Noise", rb_cObject);
 
     rb_define_method(rb_cPerlin, "initialize", Perlin_init, 3);
     rb_define_method(rb_cPerlin, "run", perlin_run, 2);
     rb_define_method(rb_cPerlin, "run2d", perlin_run, 2);
     rb_define_method(rb_cPerlin, "run3d", perlin_run3d, 3);
-    rb_define_method(rb_cPerlin, "return_chunk", perlin_return_chunk, 4);
+    rb_define_method(rb_cPerlin, "chunk", perlin_chunk, 4);
 }
 
