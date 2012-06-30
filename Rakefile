@@ -30,7 +30,7 @@ Made into gem by Bil Bas (bil.bagpuss@gmail.com)
   END
 
   s.email = %w<mojobojo@gmail.com>
-  s.files = Dir.glob %w<CHANGELOG LICENSE Rakefile README.md lib/**/*.* ext/**/*.c ext/**/*.rb examples/**/*.*>
+  s.files = Dir.glob %w<CHANGELOG LICENSE Rakefile README.md lib/**/*.* lib ext/**/*.* examples/**/*.*>
   s.homepage = 'https://github.com/boj/ruby-perlin'
   s.licenses = %w<MIT>
   s.extensions << 'ext/perlin/extconf.rb'
