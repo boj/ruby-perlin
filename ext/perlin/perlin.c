@@ -184,16 +184,16 @@ VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 }
 
 /*
-Returns a chunk of coordinates starting from x, y and of size width, height.
+Returns a chunk of coordinates starting from x, y and of size size_x, size_y.
 */
-VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE width, VALUE height)
+VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
 {
     VALUE arr = rb_ary_new();
     int i, j;
-    for (i = NUM2INT(x); i < NUM2INT(width) + NUM2INT(x); i++)
+    for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
     {
         VALUE row = rb_ary_new();
-        for (j = NUM2INT(y); j < NUM2INT(height) + NUM2INT(y); j++)
+        for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
         {
             rb_ary_push(row, perlin_run2d(self, INT2NUM(i), INT2NUM(j)));
         }

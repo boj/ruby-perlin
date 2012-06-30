@@ -14,7 +14,7 @@ module Perlin
 class Noise
   attr_reader :octave, :persistence
 
-  # @overload chunk(x, y, width, height)
+  # @overload chunk(x, y, size_x, size_y)
   #   Calculates a rectangular section of height (n) values and returns them as a 2D array.
   #
   #   This is much faster than accessing each point separately using {#[]}
@@ -35,8 +35,10 @@ class Noise
   #   @return [Array<Array<Float>>] height (n) values within the rectangle.
   def chunk(*args)
     case args.size
+      when 6
+        raise ImplementationError, "3d noise is not supported in chunks yet"
       when 4
-        raise ArgumentError, "Can't have negative height or width" if args[2] < 0 or args[3] < 0
+        raise ArgumentError, "Can't have negative size_x or size_y" if args[2] < 0 or args[3] < 0
         chunk2d *args
       else
         raise ArgumentError, "#{args.size} dimensional noise generation is not supported for chunks. 2D only, using (x, y, width, height)"

@@ -24,7 +24,7 @@ USAGE
     # Returns a 'height' value for (x, y)
     puts noise[10, 20]  #=> 0.9004574418067932
 
-    # Returns a 2D array of 'heights' for a range (x, y, width, height)
+    # Returns a 2D array of 'heights' for a range (x, y, size_x, size_y)
     arr = noise.chunk 1, 1, 2, 3
 
     p arr  #= > [[0.05753844603896141, -0.2208995521068573, 0.3973901569843292],
