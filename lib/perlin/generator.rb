@@ -6,8 +6,17 @@ module Perlin
   #
   # @!attribute [r] octave
   #   @return [Integer]
-  class Noise
+  class Generator
     attr_reader :octave, :persistence
+
+    # @!method initialize(seed, persistence, octave)
+    #   Create a noise generator.
+    #
+    #   Using the same seed will always produce the same pattern. Animate a perlin 'texture' by altering the seed based on time.
+    #
+    #   @param seed [Integer] Seed value to create a different pattern.
+    #   @param persistence [Float] Used to generate different frequencies/amplitudes of output.
+    #   @param octave [Integer] Number of iterations to run (higher number of octaves takes more time)
 
     # @overload chunk(x, y, size_x, size_y)
     #   Calculates a rectangular section of height (n) values and returns them as a 2D array.
@@ -15,7 +24,7 @@ module Perlin
     #   This is much faster than accessing each point separately using {#[]}
     #
     #   @example
-    #     noise = Perlin::Noise.new 123, 1.0, 1
+    #     noise = Perlin::Generator.new 123, 1.0, 1
     #     arr = noise.chunk 1, 1, 2, 3
     #
     #     # access position 1, 2 (remember that arr is offset by the x, y value of the chunk)
@@ -35,7 +44,7 @@ module Perlin
     #   This is much faster than accessing each point separately using {#[]}
     #
     #   @example
-    #     noise = Perlin::Noise.new 123, 1.0, 1
+    #     noise = Perlin::Generator.new 123, 1.0, 1
     #     arr = noise.chunk 6, 5, 4, 3, 2, 1
     #
     #     # access position 2, 1, 0 (remember that arr is offset by the x, y and z value of the chunk)
@@ -71,7 +80,7 @@ module Perlin
     #   Gets height (n) value at a specific 2D position.
     #
     #   @example
-    #     noise = Perlin::Noise.new 123, 1.0, 1
+    #     noise = Perlin::Generator.new 123, 1.0, 1
     #
     #     # Returns a 'height' value for (x, y)
     #     puts noise[10, 20]  #=> 0.9004574418067932
@@ -84,7 +93,7 @@ module Perlin
     #   Gets height (n) value at a specific 3D position.
     #
     #   @example
-    #     noise = Perlin::Noise.new 123, 1.0, 1
+    #     noise = Perlin::Generator.new 123, 1.0, 1
     #
     #     # Returns a 'height' value for (x, y, z)
     #     puts noise[10, 20, 30]  #=> 0.017745036631822586

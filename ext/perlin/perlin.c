@@ -13,7 +13,7 @@ static long seed = 0;
 /*
 The main initialize function which receives the inputs persistence and octave.
 */
-VALUE Perlin_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
+VALUE perlin_generator_init(VALUE self, VALUE seed_value, VALUE persistence, VALUE octave)
 {
     persistence = rb_funcall(persistence, rb_intern("to_f"), 0);
     rb_iv_set(self, "@persistence", persistence);
@@ -146,7 +146,7 @@ float perlin_interpolated_noise_3d(const float x, const float y, const float z)
 /*
 Takes points (x, y) and returns a height (n)
 */
-VALUE perlin_run2d(VALUE self, const VALUE x, const VALUE y)
+VALUE perlin_generator_run2d(VALUE self, const VALUE x, const VALUE y)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
@@ -166,7 +166,7 @@ VALUE perlin_run2d(VALUE self, const VALUE x, const VALUE y)
 /*
 Takes points (x, y, z) and returns a height (n)
 */
-VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
+VALUE perlin_generator_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
@@ -186,7 +186,7 @@ VALUE perlin_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
 /*
 Returns a chunk of coordinates starting from x, y and of size size_x, size_y.
 */
-VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
+VALUE perlin_generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
 {
     VALUE arr = rb_ary_new();
     int i, j;
@@ -195,7 +195,7 @@ VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
         VALUE row = rb_ary_new();
         for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
         {
-            rb_ary_push(row, perlin_run2d(self, INT2NUM(i), INT2NUM(j)));
+            rb_ary_push(row, perlin_generator_run2d(self, INT2NUM(i), INT2NUM(j)));
         }
         rb_ary_push(arr, row);
     }
@@ -205,7 +205,7 @@ VALUE perlin_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
 /*
 Returns a chunk of coordinates starting from x, y, z and of size size_x, size_y, size_z.
 */
-VALUE perlin_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
+VALUE perlin_generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
 {
     VALUE arr = rb_ary_new();
     int i, j, k;
@@ -217,7 +217,7 @@ VALUE perlin_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE 
             VALUE column = rb_ary_new();
             for (k = NUM2INT(z); k < NUM2INT(size_z) + NUM2INT(z); k++)
             {
-                rb_ary_push(column, perlin_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
+                rb_ary_push(column, perlin_generator_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
             }
             rb_ary_push(row, column);
         }
@@ -228,12 +228,12 @@ VALUE perlin_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE 
 
 void Init_perlin() {
     VALUE jm_Module = rb_define_module("Perlin");
-    VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Noise", rb_cObject);
+    VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Generator", rb_cObject);
 
-    rb_define_method(rb_cPerlin, "initialize", Perlin_init, 3);
-    rb_define_method(rb_cPerlin, "run2d", perlin_run2d, 2);
-    rb_define_method(rb_cPerlin, "run3d", perlin_run3d, 3);
-    rb_define_method(rb_cPerlin, "chunk2d", perlin_chunk2d, 4);
-    rb_define_method(rb_cPerlin, "chunk3d", perlin_chunk3d, 6);
+    rb_define_method(rb_cPerlin, "initialize", perlin_generator_init, 3);
+    rb_define_method(rb_cPerlin, "run2d", perlin_generator_run2d, 2);
+    rb_define_method(rb_cPerlin, "run3d", perlin_generator_run3d, 3);
+    rb_define_method(rb_cPerlin, "chunk2d", perlin_generator_chunk2d, 4);
+    rb_define_method(rb_cPerlin, "chunk3d", perlin_generator_chunk3d, 6);
 }
 

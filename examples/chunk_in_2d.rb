@@ -1,7 +1,7 @@
 require 'perlin'
 
 def print_data(seed, persistence, octave, size_x, size_y)
-  noise = Perlin::Noise.new seed, persistence, octave
+  noise = Perlin::Generator.new seed, persistence, octave
 
   puts
 
