@@ -1,3 +1,4 @@
-Makefile
-perlin.o
-perlin.bundle
+.idea/
+.yardoc/
+doc/
+*.gem
