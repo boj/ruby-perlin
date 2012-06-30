@@ -30,6 +30,30 @@ describe Perlin::Generator do
     @perlin.octave.should be_kind_of Integer
   end
 
+  describe "seed=" do
+    it "should set seed correctly" do
+      @perlin.seed = 12
+      @perlin.seed.should eq 12
+      @perlin.seed.should be_kind_of Integer
+    end
+  end
+
+  describe "persistence=" do
+    it "should set persistence correctly" do
+      @perlin.persistence = 12
+      @perlin.persistence.should eq 12
+      @perlin.persistence.should be_kind_of Float
+    end
+  end
+
+  describe "octave=" do
+    it "should set octave correctly" do
+      @perlin.octave = 12
+      @perlin.octave.should eq 12
+      @perlin.octave.should be_kind_of Integer
+    end
+  end
+
   describe "[]" do
     it "should fail if given too few arguments" do
       ->{ @perlin[0] }.should raise_error ArgumentError

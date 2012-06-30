@@ -1,6 +1,9 @@
 module Perlin
   # Perlin noise generator.
   #
+  # @!attribute [rw] seed
+  #   @return [Integer]
+  #
   # @!attribute [r] persistence
   #   @return [Float]
   #

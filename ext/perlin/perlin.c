@@ -10,14 +10,29 @@ static VALUE rb_cPerlin;
 
 static long seed = 0;
 
+VALUE Perlin_Generator_set_seed(VALUE self, VALUE seed)
+{
+    rb_iv_set(self, "@seed", rb_funcall(seed, rb_intern("to_i"), 0));
+}
+
+VALUE Perlin_Generator_set_persistence(VALUE self, VALUE persistence)
+{
+   rb_iv_set(self, "@persistence", rb_funcall(persistence, rb_intern("to_f"), 0));
+}
+
+VALUE Perlin_Generator_set_octave(VALUE self, VALUE octave)
+{
+    rb_iv_set(self, "@octave", rb_funcall(octave, rb_intern("to_i"), 0));
+}
+
 /*
 The main initialize function which receives the inputs persistence and octave.
 */
 VALUE Perlin_Generator_init(VALUE self, VALUE seed, VALUE persistence, VALUE octave)
 {
-    rb_iv_set(self, "@seed",        rb_funcall(seed,        rb_intern("to_i"), 0));
-    rb_iv_set(self, "@persistence", rb_funcall(persistence, rb_intern("to_f"), 0));
-    rb_iv_set(self, "@octave",      rb_funcall(octave,      rb_intern("to_i"), 0));
+    Perlin_Generator_set_seed(self, seed);
+    Perlin_Generator_set_persistence(self, persistence);
+    Perlin_Generator_set_octave(self, octave);
 
     return self;
 }
@@ -235,6 +250,10 @@ void Init_perlin() {
     VALUE rb_cPerlin = rb_define_class_under(jm_Module, "Generator", rb_cObject);
 
     rb_define_method(rb_cPerlin, "initialize", Perlin_Generator_init, 3);
+
+    rb_define_method(rb_cPerlin, "seed=", Perlin_Generator_set_seed, 1);
+    rb_define_method(rb_cPerlin, "persistence=", Perlin_Generator_set_persistence, 1);
+    rb_define_method(rb_cPerlin, "octave=", Perlin_Generator_set_octave, 1);
 
     rb_define_method(rb_cPerlin, "run2d", Perlin_Generator_run2d, 2);
     rb_define_method(rb_cPerlin, "run3d", Perlin_Generator_run3d, 3);
