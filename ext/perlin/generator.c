@@ -15,6 +15,7 @@ VALUE Perlin_Generator_set_octave(VALUE self, VALUE octave)
     rb_iv_set(self, "@octave", rb_funcall(octave, rb_intern("to_i"), 0));
 }
 
+
 /*
 Takes points (x, y) and returns a height (n)
 */
@@ -22,20 +23,10 @@ VALUE Perlin_Generator_run2d(VALUE self, const VALUE x, const VALUE y)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
-    float total = 0.;
-    float frequency = 1., amplitude = 1.;
-    int i;
 
     seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
-    for (i = 0; i < n; ++i)
-    {
-        total += perlin_interpolated_noise_2d(NUM2INT(x) * frequency, NUM2INT(y) * frequency) * amplitude;
-        frequency *= 2;
-        amplitude *= p;
-    }
-
-    return rb_float_new(total);
+    return rb_float_new(perlin_octaves_2d(NUM2INT(x), NUM2INT(y), p, n));
 }
 
 /*
@@ -45,20 +36,10 @@ VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VAL
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
-    float total = 0.;
-    float frequency = 1., amplitude = 1.;
-    int i;
 
     seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
-    for (i = 0; i < n; ++i)
-    {
-        total += perlin_interpolated_noise_3d(NUM2INT(x) * frequency, NUM2INT(y) * frequency, NUM2INT(z) * frequency) * amplitude;
-        frequency *= 2;
-        amplitude *= p;
-    }
-
-    return rb_float_new(total);
+    return rb_float_new(perlin_octaves_3d(NUM2INT(x), NUM2INT(y), NUM2INT(z), p, n));
 }
 
 /*
@@ -66,16 +47,26 @@ Returns a chunk of coordinates starting from x, y and of size size_x, size_y.
 */
 VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
 {
+    const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
+    const int n = NUM2INT(rb_iv_get(self, "@octave"));
+
     VALUE arr, row;
     int i, j;
 
+    int x_min = NUM2INT(x);
+    int x_max = x_min + NUM2INT(size_x);
+    int y_min = NUM2INT(y);
+    int y_max = y_min + NUM2INT(size_y);
+
+    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+
     if(rb_block_given_p())
     {
-       for (i = NUM2INT(y); i < NUM2INT(size_y) + NUM2INT(y); i++)
+       for (i = y_min; i < y_max; i++)
        {
-           for (j = NUM2INT(x); j < NUM2INT(size_x) + NUM2INT(x); j++)
+           for (j = x_min; j < x_max; j++)
            {
-               rb_yield_values(3, Perlin_Generator_run2d(self, INT2NUM(j), INT2NUM(i)), INT2NUM(j), INT2NUM(i));
+               rb_yield_values(3, rb_float_new(perlin_octaves_2d(j, i, p, n)), INT2NUM(j), INT2NUM(i));
            }
        }
 
@@ -84,12 +75,12 @@ VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE
     else
     {
         arr = rb_ary_new();
-        for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+        for (i = x_min; i < x_max; i++)
         {
             row = rb_ary_new();
-            for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+            for (j = y_min; j < y_max; j++)
             {
-                rb_ary_push(row, Perlin_Generator_run2d(self, INT2NUM(i), INT2NUM(j)));
+                rb_ary_push(row, rb_float_new(perlin_octaves_2d(i, j, p, n)));
             }
             rb_ary_push(arr, row);
         }
@@ -102,18 +93,30 @@ Returns a chunk of coordinates starting from x, y, z and of size size_x, size_y,
 */
 VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
 {
+    const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
+    const int n = NUM2INT(rb_iv_get(self, "@octave"));
+
     VALUE arr, row, column;
     int i, j, k;
 
+    int x_min = NUM2INT(x);
+    int x_max = x_min + NUM2INT(size_x);
+    int y_min = NUM2INT(y);
+    int y_max = y_min + NUM2INT(size_y);
+    int z_min = NUM2INT(z);
+    int z_max = z_min + NUM2INT(size_z);
+
+    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+
     if(rb_block_given_p())
     {
-        for (i = NUM2INT(z); i < NUM2INT(size_z) + NUM2INT(z); i++)
+        for (i = z_min; i < z_max; i++)
         {
-            for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+            for (j = y_min; j < y_max; j++)
             {
-                for (k = NUM2INT(x); k < NUM2INT(size_x) + NUM2INT(x); k++)
+                for (k = x_min; k < x_max; k++)
                 {
-                    rb_yield_values(4, Perlin_Generator_run3d(self, INT2NUM(k), INT2NUM(j), INT2NUM(i)), INT2NUM(k), INT2NUM(j), INT2NUM(i));
+                    rb_yield_values(4, rb_float_new(perlin_octaves_3d(k, j, i, p, n)), INT2NUM(k), INT2NUM(j), INT2NUM(i));
                 }
             }
         }
@@ -122,15 +125,15 @@ VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size
     else
     {
         arr = rb_ary_new();
-        for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+        for (i = x_min; i < x_max; i++)
         {
             row = rb_ary_new();
-            for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+            for (j = y_min; j < y_max; j++)
             {
                 column = rb_ary_new();
-                for (k = NUM2INT(z); k < NUM2INT(size_z) + NUM2INT(z); k++)
+                for (k = z_min; k < z_max; k++)
                 {
-                    rb_ary_push(column, Perlin_Generator_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
+                    rb_ary_push(column, rb_float_new(perlin_octaves_3d(i, j, k, p, n)));
                 }
                 rb_ary_push(row, column);
             }

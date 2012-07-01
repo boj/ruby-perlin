@@ -9,6 +9,9 @@ static inline float perlin_interpolate(const float a, const float b, const float
     return    a * (1 - f) + b * f;
 }
 
+
+// 2D ------------------------------------------------------------------
+
 static inline float perlin_noise_2d(const int x, const int y)
 {
     long n = x + y * 57;
@@ -52,6 +55,24 @@ float perlin_interpolated_noise_2d(const float x, const float y)
 
     return perlin_interpolate(i1, i2, fractional_Y);
 }
+
+float perlin_octaves_2d(const float x, const float y, const float p, const float n)
+{
+    float total = 0.;
+    float frequency = 1., amplitude = 1.;
+    int i;
+
+    for (i = 0; i < n; ++i)
+    {
+        total += perlin_interpolated_noise_2d(x * frequency, y * frequency) * amplitude;
+        frequency *= 2;
+        amplitude *= p;
+    }
+
+    return total;
+}
+
+// 3D ------------------------------------------------------------------
 
 static inline float perlin_noise_3d(const int x, const int y, const int z)
 {
@@ -119,5 +140,21 @@ float perlin_interpolated_noise_3d(const float x, const float y, const float z)
     const float y2 = perlin_interpolate(i3, i4, fractional_Y);
 
     return perlin_interpolate(y1, y2, fractional_Z);
+}
+
+float perlin_octaves_3d(const float x, const float y, const float z, const float p, const float n)
+{
+    float total = 0.;
+    float frequency = 1., amplitude = 1.;
+    int i;
+
+    for (i = 0; i < n; ++i)
+    {
+        total += perlin_interpolated_noise_3d(x * frequency, y * frequency, z * frequency) * amplitude;
+        frequency *= 2;
+        amplitude *= p;
+    }
+
+    return total;
 }
 
