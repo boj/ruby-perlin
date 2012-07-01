@@ -1,3 +1,5 @@
+require 'rake/clean'
+
 begin
   require 'devkit' # only used on windows
 rescue LoadError
@@ -53,4 +55,9 @@ YARD::Rake::YardocTask.new
 desc "Create platform-specific compiled gem"
 task :native_gem do
   system "rake native gem"
+end
+
+desc "Run benchmarks"
+task :bench => :compile do
+  require File.expand_path("../bench/benchmarks.rb", __FILE__)
 end

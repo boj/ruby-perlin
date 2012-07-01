@@ -207,18 +207,35 @@ Returns a chunk of coordinates starting from x, y and of size size_x, size_y.
 */
 VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
 {
-    VALUE arr = rb_ary_new();
+    VALUE arr, row;
     int i, j;
-    for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+
+    if(rb_block_given_p())
     {
-        VALUE row = rb_ary_new();
-        for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
-        {
-            rb_ary_push(row, Perlin_Generator_run2d(self, INT2NUM(i), INT2NUM(j)));
-        }
-        rb_ary_push(arr, row);
+       for (i = NUM2INT(y); i < NUM2INT(size_y) + NUM2INT(y); i++)
+       {
+           for (j = NUM2INT(x); j < NUM2INT(size_x) + NUM2INT(x); j++)
+           {
+               rb_yield_values(3, Perlin_Generator_run2d(self, INT2NUM(j), INT2NUM(i)), INT2NUM(j), INT2NUM(i));
+           }
+       }
+
+       return Qnil;
     }
-    return arr;
+    else
+    {
+        arr = rb_ary_new();
+        for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+        {
+            row = rb_ary_new();
+            for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+            {
+                rb_ary_push(row, Perlin_Generator_run2d(self, INT2NUM(i), INT2NUM(j)));
+            }
+            rb_ary_push(arr, row);
+        }
+        return arr;
+    }
 }
 
 /*
@@ -226,23 +243,42 @@ Returns a chunk of coordinates starting from x, y, z and of size size_x, size_y,
 */
 VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
 {
-    VALUE arr = rb_ary_new();
+    VALUE arr, row, column;
     int i, j, k;
-    for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+
+    if(rb_block_given_p())
     {
-        VALUE row = rb_ary_new();
-        for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+        for (i = NUM2INT(z); i < NUM2INT(size_z) + NUM2INT(z); i++)
         {
-            VALUE column = rb_ary_new();
-            for (k = NUM2INT(z); k < NUM2INT(size_z) + NUM2INT(z); k++)
+            for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
             {
-                rb_ary_push(column, Perlin_Generator_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
+                for (k = NUM2INT(x); k < NUM2INT(size_x) + NUM2INT(x); k++)
+                {
+                    rb_yield_values(4, Perlin_Generator_run3d(self, INT2NUM(k), INT2NUM(j), INT2NUM(i)), INT2NUM(k), INT2NUM(j), INT2NUM(i));
+                }
             }
-            rb_ary_push(row, column);
         }
-        rb_ary_push(arr, row);
+        return Qnil;
     }
-    return arr;
+    else
+    {
+        arr = rb_ary_new();
+        for (i = NUM2INT(x); i < NUM2INT(size_x) + NUM2INT(x); i++)
+        {
+            row = rb_ary_new();
+            for (j = NUM2INT(y); j < NUM2INT(size_y) + NUM2INT(y); j++)
+            {
+                column = rb_ary_new();
+                for (k = NUM2INT(z); k < NUM2INT(size_z) + NUM2INT(z); k++)
+                {
+                    rb_ary_push(column, Perlin_Generator_run3d(self, INT2NUM(i), INT2NUM(j), INT2NUM(k)));
+                }
+                rb_ary_push(row, column);
+            }
+            rb_ary_push(arr, row);
+        }
+        return arr;
+    }
 }
 
 void Init_perlin() {

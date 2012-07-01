@@ -41,6 +41,26 @@ module Perlin
     #   @param size_y [Integer]
     #   @return [Array<Array<Float>>] height (n) values within the rectangle.
     #
+    # @overload chunk(x, y, size_x, size_y) {|h, x, y| }
+    #   Calculates a rectangular section of height (n) values and returns them as a 2D array.
+    #
+    #   This is much faster than accessing each point separately using {#[]}
+    #
+    #   @example
+    #     noise = Perlin::Generator.new 123, 1.0, 1
+    #     noise.chunk()1, 1, 2, 3) do |h, x, y|
+    #       # Use the height value, which is at x, y.
+    #     end
+    #
+    #   @param x [Integer]
+    #   @param y [Integer]
+    #   @param size_x [Integer]
+    #   @param size_y [Integer]
+    #   @yieldparam h [Float] Height at x, y
+    #   @yieldparam x [Integer]
+    #   @yieldparam y [Integer]
+    #   @return [nil]
+    #
     # @overload chunk(x, y, z, size_x, size_y, size_z)
     #   Calculates a rectangular section of height (n) values and returns them as a 3D array.
     #
@@ -62,14 +82,37 @@ module Perlin
     #   @param size_y [Integer]
     #   @param size_z [Integer]
     #   @return [Array<Array<Float>>] height (n) values within the rectangle.
-    def chunk(*args)
+    #
+    # @overload chunk(x, y, z, size_x, size_y, size_z) {|h, x, y| }
+    #   Calculates a rectangular section of height (n) values and returns them as a 3D array.
+    #
+    #   This is much faster than accessing each point separately using {#[]}
+    #
+    #   @example
+    #     noise = Perlin::Generator.new 123, 1.0, 1
+    #     noise.chunk 6, 5, 4, 3, 2, 1) do |h, x, y, z|
+    #       # Use the height value, which is at x, y, z.
+    #     end
+    #
+    #   @param x [Integer]
+    #   @param y [Integer]
+    #   @param z [Integer]
+    #   @param size_x [Integer]
+    #   @param size_y [Integer]
+    #   @param size_z [Integer]
+    #   @yieldparam h [Float] Height at x, y, z
+    #   @yieldparam x [Integer]
+    #   @yieldparam y [Integer]
+    #   @yieldparam z [Integer]
+    #   @return [nil]
+    def chunk(*args, &block)
       case args.size
         when 6
           raise ArgumentError, "Can't have negative size_x, size_y or size_y" if args[3] < 0 || args[4] < 0 ||  args[5] < 0
-          chunk3d *args
+          chunk3d *args, &block
         when 4
           raise ArgumentError, "Can't have negative size_x or size_y" if args[2] < 0 ||  args[3] < 0
-          chunk2d *args
+          chunk2d *args, &block
         else
           raise ArgumentError, "#{args.size} dimensional noise generation is not supported for chunks. 2D only, using (x, y, width, height)"
       end
@@ -88,8 +131,8 @@ module Perlin
     #     # Returns a 'height' value for (x, y)
     #     puts noise[10, 20]  #=> 0.9004574418067932
     #
-    #   @param x [Integer]
-    #   @param y [Integer]
+    #   @param x [Float]
+    #   @param y [Float]
     #   @return [Float] height (n) value at the position
     #
     # @overload [](x, y, z)
@@ -101,9 +144,9 @@ module Perlin
     #     # Returns a 'height' value for (x, y, z)
     #     puts noise[10, 20, 30]  #=> 0.017745036631822586
     #
-    #   @param x [Integer]
-    #   @param y [Integer]
-    #   @param z [Integer]
+    #   @param x [Float]
+    #   @param y [Float]
+    #   @param z [Float]
     #   @return [Float]  height (n) value at the position
     def [](*args)
       case args.size
