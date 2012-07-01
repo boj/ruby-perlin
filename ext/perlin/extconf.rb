@@ -9,5 +9,6 @@ $CFLAGS += ' -DRUBY_19' if RUBY_VERSION =~ /^1.9/
 
 # let's use c99
 #$CFLAGS += " -std=c99"
+$CFLAGS += " -std=gnu99"
 
 create_makefile(extension_name)

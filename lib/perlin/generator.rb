@@ -11,6 +11,7 @@ module Perlin
   #   @return [Integer]
   class Generator
     attr_reader :seed, :octave, :persistence
+    def classic?; @classic; end
 
     # @!method initialize(seed, persistence, octave)
     #   Create a noise generator.
@@ -20,6 +21,15 @@ module Perlin
     #   @param seed [Integer] Seed value to create a different pattern.
     #   @param persistence [Float] Used to generate different frequencies/amplitudes of output.
     #   @param octave [Integer] Number of iterations to run (higher number of octaves takes more time)
+    #   @option options :classic [Boolean] (false) Whether to use the slower Classic algorithm, rather than default (and much faster) Simplex.
+    def initialize(seed, persistence, octave, options = {})
+      options = {
+          :classic => false,
+      }.merge! options
+
+      initialize_(seed, persistence, octave, options[:classic])
+    end
+    protected :initialize_ # Underlying C implementation.
 
     # @overload chunk(x, y, size_x, size_y)
     #   Calculates a rectangular section of height (n) values and returns them as a 2D array.
