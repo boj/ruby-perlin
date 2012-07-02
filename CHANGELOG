@@ -1,10 +1,13 @@
-0.0.1
+0.1.0
 -----
 
-* Converted to gem (previously was just a .c file)
+* Converted to gem (previously was just a .c file).
 * Added 3D chunks.
+* Optimised chunk operations.
 * Added Generator#[x, y]
 * Added Generator#[x, y, z]
 * Added Generator#chunk x, y, size_x, size_y
 * Added Generator#chunk x, y, z, size_x, size_y, size_z
-* Added Generator#persistence and Generator#octave accessors.
+* Added Generator#persistence, #seed and #octave accessors.
+* Added Perlin's Simplex generation (much faster).
+* A number of general fixes (added rspec tests).

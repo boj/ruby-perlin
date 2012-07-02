@@ -5,4 +5,7 @@ doc/
 /lib/perlin.so
 pkg/
 tmp/
+coverage
 /lib/perlin/perlin.so
+/lib/perlin/1.8/perlin.so
+/lib/perlin/1.9/perlin.so

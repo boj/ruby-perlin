@@ -1,6 +1,7 @@
 require 'mkmf'
 
-extension_name = 'perlin/perlin'
+RUBY_VERSION =~ /(\d+.\d+)/
+extension_name = "perlin/#{$1}/perlin"
 
 dir_config(extension_name)
 

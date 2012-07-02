@@ -1,5 +1,5 @@
 
-require "./../helper.rb"
+require File.expand_path("../../helper.rb", __FILE__)
 
 describe Perlin::Generator do
   before :each do
@@ -76,11 +76,11 @@ describe Perlin::Generator do
 
   describe "[]" do
     it "should fail if given too few arguments" do
-      ->{ @classic[0] }.should raise_error ArgumentError
+      lambda { @classic[0] }.should raise_error ArgumentError
     end
 
     it "should fail if given too many arguments" do
-      ->{ @classic[0, 0, 0, 0] }.should raise_error ArgumentError
+      lambda { @classic[0, 0, 0, 0] }.should raise_error ArgumentError
     end
 
     describe "SIMPLEX" do
@@ -145,11 +145,11 @@ describe Perlin::Generator do
       end
 
       it "should fail if given negative size_x" do
-        ->{ @classic.chunk 0, 0, -1, 0 }.should raise_error ArgumentError
+        lambda { @classic.chunk 0, 0, -1, 0 }.should raise_error ArgumentError
       end
 
       it "should fail if given negative size_y" do
-        ->{ @classic.chunk 0, 0, 0, -1 }.should raise_error ArgumentError
+        lambda { @classic.chunk 0, 0, 0, -1 }.should raise_error ArgumentError
       end
     end
 
@@ -185,15 +185,15 @@ describe Perlin::Generator do
       end
 
       it "should fail if given negative size_x" do
-        ->{ @classic.chunk 0, 0, 0, -1, 0, 0 }.should raise_error ArgumentError
+        lambda { @classic.chunk 0, 0, 0, -1, 0, 0 }.should raise_error ArgumentError
       end
 
       it "should fail if given negative size_y" do
-        ->{ @classic.chunk 0, 0, 0, 0, -1, 0 }.should raise_error ArgumentError
+        lambda { @classic.chunk 0, 0, 0, 0, -1, 0 }.should raise_error ArgumentError
       end
 
       it "should fail if given negative size_z" do
-        ->{ @classic.chunk 0, 0, 0, 0, 0, -1 }.should raise_error ArgumentError
+        lambda { @classic.chunk 0, 0, 0, 0, 0, -1 }.should raise_error ArgumentError
       end
     end
   end

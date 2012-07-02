@@ -1,8 +1,13 @@
-$LOAD_PATH.unshift File.expand_path("../perlin", __FILE__)
-require 'version'
+require 'perlin/version'
 
-require 'perlin.so'
-require 'generator'
+begin
+  RUBY_VERSION =~ /(\d+.\d+)/
+  require "perlin/#{$1}/perlin.so"
+rescue LoadError
+  require "perlin/perlin.so"
+end
+
+require 'perlin/generator'
 
 module Perlin
 end
