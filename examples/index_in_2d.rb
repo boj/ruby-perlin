@@ -18,6 +18,6 @@ def print_data(seed, persistence, octave, size_x, size_y)
   end
 end
 
-print_data 5, 1.0, 1, 10, 2000
+print_data 5, 1.0, 1, 10, 500
 
 puts "\nDone!"

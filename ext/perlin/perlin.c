@@ -18,7 +18,7 @@ void Init_perlin() {
 
     rb_define_method(rb_cPerlin, "run2d", Perlin_Generator_run2d, 2);
     rb_define_method(rb_cPerlin, "run3d", Perlin_Generator_run3d, 3);
-    rb_define_method(rb_cPerlin, "chunk2d", Perlin_Generator_chunk2d, 4);
-    rb_define_method(rb_cPerlin, "chunk3d", Perlin_Generator_chunk3d, 6);
+    rb_define_method(rb_cPerlin, "chunk2d", Perlin_Generator_chunk2d, 5);
+    rb_define_method(rb_cPerlin, "chunk3d", Perlin_Generator_chunk3d, 7);
 }
 

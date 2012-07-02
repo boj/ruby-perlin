@@ -30,7 +30,7 @@ VALUE Perlin_Generator_run2d(VALUE self, const VALUE x, const VALUE y)
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
     const VALUE classic = rb_iv_get(self, "@classic");
 
-    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+    seed = NUM2LONG(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
     if(RTEST(classic))
     {
@@ -51,7 +51,7 @@ VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VAL
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
     const VALUE classic = rb_iv_get(self, "@classic");
 
-    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+    seed = NUM2LONG(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
     if(RTEST(classic))
     {
@@ -65,131 +65,155 @@ VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VAL
 }
 
 /*
-Returns a chunk of coordinates starting from x, y and of size size_x, size_y.
+Returns a chunk of coordinates starting from x, y and of size steps_x, steps_y with interval.
 */
-VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE size_x, VALUE size_y)
+VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE steps_x, VALUE steps_y, VALUE interval)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
-    const VALUE classic = rb_iv_get(self, "@classic");
+    const int is_classic = RTEST(rb_iv_get(self, "@classic"));
 
     VALUE arr, row;
     int i, j;
 
-    int x_min = NUM2INT(x);
-    int x_max = x_min + NUM2INT(size_x);
-    int y_min = NUM2INT(y);
-    int y_max = y_min + NUM2INT(size_y);
+    float x_min = NUM2DBL(x), y_min = NUM2DBL(y);
+    float _x = x_min, _y = y_min;
+    const int _steps_x = NUM2INT(steps_x), _steps_y = NUM2INT(steps_y);
+    const float _interval = NUM2DBL(interval);
 
-    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+    seed = NUM2LONG(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
     if(rb_block_given_p())
     {
-       for (i = y_min; i < y_max; i++)
-       {
-           for (j = x_min; j < x_max; j++)
+        // Iterate through x, then y [0, 0], [1, 0], [2, 0]...
+        _x = x_min;
+        for (i = 0; i < _steps_x; i++)
+        {
+           _y = y_min;
+           for (j = 0; j < _steps_y; j++)
            {
-                if(RTEST(classic))
+                if(is_classic)
                 {
-                    rb_yield_values(3, rb_float_new(perlin_octaves_2d(j, i, p, n)), INT2NUM(j), INT2NUM(i));
+                    rb_yield_values(3, rb_float_new(perlin_octaves_2d(_x, _y, p, n)), rb_float_new(_x), rb_float_new(_y));
                 }
                 else
                 {
-                    rb_yield_values(3, rb_float_new(octave_noise_2d(n, p, 1.0, j, i)), INT2NUM(j), INT2NUM(i));
+                    rb_yield_values(3, rb_float_new(octave_noise_2d(n, p, 1.0, _x, _y)), rb_float_new(_x), rb_float_new(_y));
                 }
+
+                _y += _interval;
            }
+           _x += _interval;
        }
 
        return Qnil;
     }
     else
     {
+        // 2D array can be indexed with arr[x][y]
         arr = rb_ary_new();
-        for (i = x_min; i < x_max; i++)
+        _x = x_min;
+        for (i = 0; i < _steps_x; i++)
         {
             row = rb_ary_new();
-            for (j = y_min; j < y_max; j++)
+            _y = y_min;
+            for (j = 0; j < _steps_y; j++)
             {
-                if(RTEST(classic))
+                if(is_classic)
                 {
-                    rb_ary_push(row, rb_float_new(perlin_octaves_2d(i, j, p, n)));
+                    rb_ary_push(row, rb_float_new(perlin_octaves_2d(_x, _y, p, n)));
                 }
                 else
                 {
-                    rb_ary_push(row, rb_float_new(octave_noise_2d(n, p, 1.0, i, j)));
+                    rb_ary_push(row, rb_float_new(octave_noise_2d(n, p, 1.0, _x, _y)));
                 }
+
+                _y += _interval;
             }
             rb_ary_push(arr, row);
+            _x += _interval;
         }
         return arr;
     }
 }
 
 /*
-Returns a chunk of coordinates starting from x, y, z and of size size_x, size_y, size_z.
+Returns a chunk of coordinates starting from x, y, z and of size steps_x, steps_y, size_z with interval.
 */
-VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE size_x, VALUE size_y, VALUE size_z)
+VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE steps_x, VALUE steps_y, VALUE steps_z, VALUE interval)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
-    const VALUE classic = rb_iv_get(self, "@classic");
+    const int is_classic = RTEST(rb_iv_get(self, "@classic"));
 
     VALUE arr, row, column;
     int i, j, k;
 
-    int x_min = NUM2INT(x);
-    int x_max = x_min + NUM2INT(size_x);
-    int y_min = NUM2INT(y);
-    int y_max = y_min + NUM2INT(size_y);
-    int z_min = NUM2INT(z);
-    int z_max = z_min + NUM2INT(size_z);
+    float x_min = NUM2DBL(x), y_min = NUM2DBL(y), z_min = NUM2DBL(z);
+    float _x = x_min, _y = y_min, _z = z_min;
+    const int _steps_x = NUM2INT(steps_x), _steps_y = NUM2INT(steps_y), _steps_z = NUM2INT(steps_z);
+    const float _interval = NUM2DBL(interval);
 
-    seed = NUM2INT(rb_iv_get(self, "@seed")); // Store in global, for speed.
+    seed = NUM2LONG(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
     if(rb_block_given_p())
     {
-        for (i = z_min; i < z_max; i++)
+        _x = x_min;
+        for (i = 0; i < _steps_x; i++)
         {
-            for (j = y_min; j < y_max; j++)
+            _y = y_min;
+            for (j = 0; j < _steps_y; j++)
             {
-                for (k = x_min; k < x_max; k++)
+                _z = z_min;
+                for (k = 0; k < _steps_z; k++)
                 {
-                    if(RTEST(classic))
+                    if(is_classic)
                     {
-                        rb_yield_values(4, rb_float_new(perlin_octaves_3d(k, j, i, p, n)), INT2NUM(k), INT2NUM(j), INT2NUM(i));
+                        rb_yield_values(4, rb_float_new(perlin_octaves_3d(_x, _y, _z, p, n)), rb_float_new(_x), rb_float_new(_y), rb_float_new(_z));
                     }
                     else
                     {
-                        rb_yield_values(4, rb_float_new(octave_noise_3d(n, p, 1.0, k, j, i)), INT2NUM(k), INT2NUM(j), INT2NUM(i));
+                        rb_yield_values(4, rb_float_new(octave_noise_3d(n, p, 1.0, _x, _y, _z)), rb_float_new(_x), rb_float_new(_y), rb_float_new(_z));
                     }
+
+                    _z += _interval;
                 }
+                _y += _interval;
             }
+            _x += _interval;
         }
         return Qnil;
     }
     else
     {
         arr = rb_ary_new();
-        for (i = x_min; i < x_max; i++)
+        _x = x_min;
+        for (i = 0; i < _steps_x; i++)
         {
             row = rb_ary_new();
-            for (j = y_min; j < y_max; j++)
+            _y = y_min;
+            for (j = 0; j < _steps_y; j++)
             {
                 column = rb_ary_new();
-                for (k = z_min; k < z_max; k++)
+                _z = z_min;
+                for (k = 0; k < _steps_z; k++)
                 {
-                    if(RTEST(classic))
+                    if(is_classic)
                     {
-                        rb_ary_push(column, rb_float_new(perlin_octaves_3d(i, j, k, p, n)));
+                        rb_ary_push(column, rb_float_new(perlin_octaves_3d(_x, _y, _z, p, n)));
                     }
                     else
                     {
-                        rb_ary_push(column, rb_float_new(octave_noise_3d(n, p, 1.0, i, j, k)));
+                        rb_ary_push(column, rb_float_new(octave_noise_3d(n, p, 1.0, _x, _y, _z)));
                     }
+
+                    _z += _interval;
                 }
                 rb_ary_push(row, column);
+                _y += _interval;
             }
             rb_ary_push(arr, row);
+            _x += _interval;
         }
         return arr;
     }

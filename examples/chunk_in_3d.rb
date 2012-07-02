@@ -1,11 +1,11 @@
 require 'perlin'
 
-def print_data(seed, persistence, octave, size_x, size_y, size_z)
+def print_data(seed, persistence, octave, size_x, size_y, size_z, interval)
   noise = Perlin::Generator.new seed, persistence, octave
 
   puts
 
-  data = noise.chunk 0, 0, 0, size_x, size_y, size_z
+  data = noise.chunk 0, 0, 0, size_x, size_y, size_z, interval
   size_z.times do |z|
     size_y.times do |y|
       str = ''
@@ -19,6 +19,6 @@ def print_data(seed, persistence, octave, size_x, size_y, size_z)
   end
 end
 
-print_data 5, 1.0, 1, 10, 2000, 99
+print_data 5, 1.0, 1, 10, 500, 99, 1.9
 
 puts "\nDone!"
