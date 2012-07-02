@@ -5,6 +5,7 @@ describe Perlin::Generator do
   before :each do
     @classic = Perlin::Generator.new 123, 1.5, 2, :classic => true
     @simplex = Perlin::Generator.new 123, 1.5, 2
+    @accuracy = 0.00001
   end
 
   it "should have seed set correctly" do
@@ -23,7 +24,7 @@ describe Perlin::Generator do
   end
 
   it "should have persistence set correctly" do
-    @classic.persistence.should eq 1.5
+    @classic.persistence.should be_within(@accuracy).of 1.5
   end
 
   it "should have octave set correctly" do
@@ -75,6 +76,14 @@ describe Perlin::Generator do
   end
 
   describe "[]" do
+    it "[x, y] should support float values" do
+      @simplex[0, 0].should_not be_within(@accuracy).of @simplex[0.2, 0.2]
+    end
+
+    it "[x, y, z] should support float values" do
+      @simplex[0, 0, 0].should_not be_within(@accuracy).of @simplex[0.2, 0.2, 0.2]
+    end
+
     it "should fail if given too few arguments" do
       lambda { @classic[0] }.should raise_error ArgumentError
     end
@@ -86,13 +95,13 @@ describe Perlin::Generator do
     describe "SIMPLEX" do
       describe "[](x, y)" do
         it "should return the appropriate value" do
-          @simplex[0, 1].should eq -0.48430206986846436
+          @simplex[0, 1].should be_within(@accuracy).of -0.48430206986846436
         end
       end
 
       describe "[](x, y, z)" do
         it "should return the appropriate value" do
-          @simplex[0, 1, 2].should eq -2.9663090652320816e-07
+          @simplex[0, 1, 2].should be_within(@accuracy).of -2.9663090652320816e-07
         end
       end
     end
@@ -100,13 +109,13 @@ describe Perlin::Generator do
     describe "CLASSIC" do
       describe "[](x, y)" do
         it "should return the appropriate value" do
-          @classic[0, 0].should eq -1.0405873507261276
+          @classic[0, 0].should be_within(@accuracy).of -1.0405873507261276
         end
       end
 
       describe "[](x, y, z)" do
         it "should return the appropriate value" do
-          @classic[0, 0, 0].should eq -1.5681833028793335
+          @classic[0, 0, 0].should be_within(@accuracy).of -1.5681833028793335
         end
       end
     end

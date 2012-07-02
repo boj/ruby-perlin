@@ -34,11 +34,11 @@ VALUE Perlin_Generator_run2d(VALUE self, const VALUE x, const VALUE y)
 
     if(RTEST(classic))
     {
-        return rb_float_new(perlin_octaves_2d(NUM2INT(x), NUM2INT(y), p, n));
+        return rb_float_new(perlin_octaves_2d(NUM2DBL(x), NUM2DBL(y), p, n));
     }
     else
     {
-        return rb_float_new(octave_noise_2d(n, p, 1.0, NUM2INT(x), NUM2INT(y)));
+        return rb_float_new(octave_noise_2d(n, p, 1.0, NUM2DBL(x), NUM2DBL(y)));
     }
 }
 
@@ -55,11 +55,11 @@ VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VAL
 
     if(RTEST(classic))
     {
-        return rb_float_new(perlin_octaves_3d(NUM2INT(x), NUM2INT(y), NUM2INT(z), p, n));
+        return rb_float_new(perlin_octaves_3d(NUM2DBL(x), NUM2DBL(y), NUM2DBL(z), p, n));
     }
     else
     {
-        return rb_float_new(octave_noise_3d(n, p, 1.0, NUM2INT(x), NUM2INT(y), NUM2INT(z)));
+        return rb_float_new(octave_noise_3d(n, p, 1.0, NUM2DBL(x), NUM2DBL(y), NUM2DBL(z)));
     }
 
 }
