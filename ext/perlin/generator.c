@@ -1,30 +1,52 @@
 #include "generator.h"
 
-VALUE Perlin_Generator_set_seed(VALUE self, VALUE seed)
+VALUE Perlin_Generator_set_seed(const VALUE self, const VALUE seed)
 {
     rb_iv_set(self, "@seed", rb_funcall(seed, rb_intern("to_i"), 0));
 }
 
-VALUE Perlin_Generator_set_persistence(VALUE self, VALUE persistence)
+VALUE Perlin_Generator_set_persistence(const VALUE self, const VALUE persistence)
 {
    rb_iv_set(self, "@persistence", rb_funcall(persistence, rb_intern("to_f"), 0));
 }
 
-VALUE Perlin_Generator_set_octave(VALUE self, VALUE octave)
+VALUE Perlin_Generator_set_octave(const VALUE self, const VALUE octave)
 {
     rb_iv_set(self, "@octave", rb_funcall(octave, rb_intern("to_i"), 0));
 }
 
-VALUE Perlin_Generator_set_classic(VALUE self, VALUE classic)
+VALUE Perlin_Generator_set_classic(const VALUE self, const VALUE classic)
 {
     rb_iv_set(self, "@classic", classic);
 }
 
+// x, y
+// x, y, z
+VALUE Perlin_Generator_run(const int argc, const VALUE *argv, const VALUE self)
+{
+    VALUE x, y, z;
+
+    rb_scan_args(argc, argv, "21", &x, &y, &z);
+
+    switch(argc)
+    {
+        case 2:
+            Perlin_Generator_run2d(self, x, y);
+            break;
+
+        case 3:
+            Perlin_Generator_run3d(self, x, y, z);
+            break;
+
+        default:
+            rb_raise(rb_eArgError, "%d parameters not supported (2D and 3D are)", argc);
+    }
+}
 
 /*
 Takes points (x, y) and returns a height (n)
 */
-VALUE Perlin_Generator_run2d(VALUE self, const VALUE x, const VALUE y)
+VALUE Perlin_Generator_run2d(const VALUE self, const VALUE x, const VALUE y)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
@@ -45,7 +67,7 @@ VALUE Perlin_Generator_run2d(VALUE self, const VALUE x, const VALUE y)
 /*
 Takes points (x, y, z) and returns a height (n)
 */
-VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VALUE z)
+VALUE Perlin_Generator_run3d(const VALUE self, const VALUE x, const VALUE y, const VALUE z)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
@@ -64,10 +86,41 @@ VALUE Perlin_Generator_run3d(VALUE self, const VALUE x, const VALUE y, const VAL
 
 }
 
+// x, y steps_x, steps_y, interval
+// x, y, z, steps_x, steps_y, steps_z, interval
+VALUE Perlin_Generator_chunk(const int argc, const VALUE *argv, const VALUE self)
+{
+    VALUE a, b, c, d, e, f, g;
+
+    rb_scan_args(argc, argv, "52", &a, &b, &c, &d, &e, &f, &g);
+
+    switch(argc)
+    {
+        case 5:
+            if((NUM2INT(c) < 1) || (NUM2INT(d) < 1))
+            {
+                rb_raise(rb_eArgError, "steps must be >= 1");
+            }
+            Perlin_Generator_chunk2d(self, a, b, c, d, e);
+            break;
+
+        case 7:
+            if((NUM2INT(d) < 1) || (NUM2INT(e) < 1) || (NUM2INT(f) < 1))
+            {
+                rb_raise(rb_eArgError, "steps must be >= 1");
+            }
+            Perlin_Generator_chunk3d(self, a, b, c, d, e, f, g);
+            break;
+
+        default:
+            rb_raise(rb_eArgError, "%d parameters not supported (5 for 2D and 7 for 3D are)", argc);
+    }
+}
+
 /*
 Returns a chunk of coordinates starting from x, y and of size steps_x, steps_y with interval.
 */
-VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE steps_x, VALUE steps_y, VALUE interval)
+VALUE Perlin_Generator_chunk2d(const VALUE self, const VALUE x, const VALUE y, const VALUE steps_x, const VALUE steps_y, const VALUE interval)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));
@@ -140,7 +193,7 @@ VALUE Perlin_Generator_chunk2d(VALUE self, VALUE x, VALUE y, VALUE steps_x, VALU
 /*
 Returns a chunk of coordinates starting from x, y, z and of size steps_x, steps_y, size_z with interval.
 */
-VALUE Perlin_Generator_chunk3d(VALUE self, VALUE x, VALUE y, VALUE z, VALUE steps_x, VALUE steps_y, VALUE steps_z, VALUE interval)
+VALUE Perlin_Generator_chunk3d(const VALUE self, const VALUE x, const VALUE y, const VALUE z, const VALUE steps_x, const VALUE steps_y, const VALUE steps_z, const VALUE interval)
 {
     const float p = RFLOAT_VALUE(rb_iv_get(self, "@persistence"));
     const int n = NUM2INT(rb_iv_get(self, "@octave"));

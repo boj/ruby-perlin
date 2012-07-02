@@ -10,6 +10,9 @@ SIZE_3D = 50
 
 t = Time.now
 
+puts "RUBY: #{RUBY_VERSION}, RUBY_PLATFORM: #{RUBY_PLATFORM}"
+puts
+
 generator = Perlin::Generator.new 128, 1, 1, :classic => true
 
 puts "=== CLASSIC PERLIN (slow) ==="

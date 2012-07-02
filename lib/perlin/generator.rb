@@ -125,18 +125,6 @@ module Perlin
     #   @yieldparam z [Float]
     #
     #   @return [nil]
-    def chunk(*args, &block)
-      case args.size
-        when 7
-          raise ArgumentError, "steps must be >= 1" if args[3] < 1 || args[4] < 1 || args[5] < 1
-          chunk3d *args, &block
-        when 5
-          raise ArgumentError, "steps must be >= 1" if args[2] < 1 || args[3] < 1
-          chunk2d *args, &block
-        else
-          raise ArgumentError, "#{args.size} parameters not supported for chunks. Requires 5 parameters for 2D or 7 for 3D"
-      end
-    end
 
     # Gets height (n) at a point in 2D or 3D space.
     #
@@ -168,17 +156,6 @@ module Perlin
     #   @param y [Float]
     #   @param z [Float]
     #   @return [Float]  height (n) value at the position
-    def [](*args)
-      case args.size
-        when 3
-          run3d *args
-        when 2
-          run2d *args
-        else
-          raise ArgumentError, "#{args.size} dimensional noise generation is not supported (2D and 3D are)"
-      end
-    end
-
     alias_method :run, :[]
   end
 end
