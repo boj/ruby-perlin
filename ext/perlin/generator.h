@@ -2,7 +2,7 @@
  * class Perlin::Generator
  */
 
- #ifndef GENERATOR_H
+#ifndef GENERATOR_H
 #define GENERATOR_H
 
 #include <ruby.h>
@@ -11,6 +11,11 @@
 #include "simplex.h"
 
 extern long seed;
+
+// Arbitrary number used to add an extra "seed" dimension for Simplex noise.
+// Seed 2D noise by offsetting the 3rd dimension.
+// Seed 3D noise by seeding with the 4th dimension.
+#define SEED_OFFSET -12354.1123f
 
 VALUE Perlin_Generator_set_seed(const VALUE self, const VALUE seed);
 VALUE Perlin_Generator_set_persistence(const VALUE self, const VALUE persistence);

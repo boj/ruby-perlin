@@ -60,7 +60,7 @@ VALUE Perlin_Generator_run2d(const VALUE self, const VALUE x, const VALUE y)
     }
     else
     {
-        return rb_float_new(octave_noise_2d(n, p, 1.0, NUM2DBL(x), NUM2DBL(y)));
+        return rb_float_new(octave_noise_3d(n, p, 1.0, NUM2DBL(x), NUM2DBL(y), seed * SEED_OFFSET));
     }
 }
 
@@ -81,7 +81,7 @@ VALUE Perlin_Generator_run3d(const VALUE self, const VALUE x, const VALUE y, con
     }
     else
     {
-        return rb_float_new(octave_noise_3d(n, p, 1.0, NUM2DBL(x), NUM2DBL(y), NUM2DBL(z)));
+        return rb_float_new(octave_noise_4d(n, p, 1.0, NUM2DBL(x), NUM2DBL(y), NUM2DBL(z), seed * SEED_OFFSET));
     }
 
 }
@@ -97,18 +97,10 @@ VALUE Perlin_Generator_chunk(const int argc, const VALUE *argv, const VALUE self
     switch(argc)
     {
         case 5:
-            if((NUM2INT(c) < 1) || (NUM2INT(d) < 1))
-            {
-                rb_raise(rb_eArgError, "steps must be >= 1");
-            }
             Perlin_Generator_chunk2d(self, a, b, c, d, e);
             break;
 
         case 7:
-            if((NUM2INT(d) < 1) || (NUM2INT(e) < 1) || (NUM2INT(f) < 1))
-            {
-                rb_raise(rb_eArgError, "steps must be >= 1");
-            }
             Perlin_Generator_chunk3d(self, a, b, c, d, e, f, g);
             break;
 
@@ -129,10 +121,15 @@ VALUE Perlin_Generator_chunk2d(const VALUE self, const VALUE x, const VALUE y, c
     VALUE arr, row;
     int i, j;
 
-    float x_min = NUM2DBL(x), y_min = NUM2DBL(y);
-    float _x = x_min, _y = y_min;
+    const float x_min = NUM2DBL(x), y_min = NUM2DBL(y);
+    float _x, _y;
     const int _steps_x = NUM2INT(steps_x), _steps_y = NUM2INT(steps_y);
     const float _interval = NUM2DBL(interval);
+
+    if(_steps_x < 1 || _steps_y < 1)
+    {
+        rb_raise(rb_eArgError, "steps must be >= 1");
+    }
 
     seed = NUM2LONG(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
@@ -147,11 +144,13 @@ VALUE Perlin_Generator_chunk2d(const VALUE self, const VALUE x, const VALUE y, c
            {
                 if(is_classic)
                 {
-                    rb_yield_values(3, rb_float_new(perlin_octaves_2d(_x, _y, p, n)), rb_float_new(_x), rb_float_new(_y));
+                    rb_yield_values(3, rb_float_new(perlin_octaves_2d(_x, _y, p, n)),
+                                    rb_float_new(_x), rb_float_new(_y));
                 }
                 else
                 {
-                    rb_yield_values(3, rb_float_new(octave_noise_2d(n, p, 1.0, _x, _y)), rb_float_new(_x), rb_float_new(_y));
+                    rb_yield_values(3, rb_float_new(octave_noise_3d(n, p, 1.0, _x, _y, seed * SEED_OFFSET)),
+                                    rb_float_new(_x), rb_float_new(_y));
                 }
 
                 _y += _interval;
@@ -178,7 +177,7 @@ VALUE Perlin_Generator_chunk2d(const VALUE self, const VALUE x, const VALUE y, c
                 }
                 else
                 {
-                    rb_ary_push(row, rb_float_new(octave_noise_2d(n, p, 1.0, _x, _y)));
+                    rb_ary_push(row, rb_float_new(octave_noise_3d(n, p, 1.0, _x, _y, seed * SEED_OFFSET)));
                 }
 
                 _y += _interval;
@@ -202,10 +201,15 @@ VALUE Perlin_Generator_chunk3d(const VALUE self, const VALUE x, const VALUE y, c
     VALUE arr, row, column;
     int i, j, k;
 
-    float x_min = NUM2DBL(x), y_min = NUM2DBL(y), z_min = NUM2DBL(z);
-    float _x = x_min, _y = y_min, _z = z_min;
+    const float x_min = NUM2DBL(x), y_min = NUM2DBL(y), z_min = NUM2DBL(z);
+    float _x, _y, _z;
     const int _steps_x = NUM2INT(steps_x), _steps_y = NUM2INT(steps_y), _steps_z = NUM2INT(steps_z);
     const float _interval = NUM2DBL(interval);
+
+    if(_steps_x < 1 || _steps_y < 1 || _steps_z < 1)
+    {
+        rb_raise(rb_eArgError, "steps must be >= 1");
+    }
 
     seed = NUM2LONG(rb_iv_get(self, "@seed")); // Store in global, for speed.
 
@@ -222,11 +226,13 @@ VALUE Perlin_Generator_chunk3d(const VALUE self, const VALUE x, const VALUE y, c
                 {
                     if(is_classic)
                     {
-                        rb_yield_values(4, rb_float_new(perlin_octaves_3d(_x, _y, _z, p, n)), rb_float_new(_x), rb_float_new(_y), rb_float_new(_z));
+                        rb_yield_values(4, rb_float_new(perlin_octaves_3d(_x, _y, _z, p, n)),
+                                        rb_float_new(_x), rb_float_new(_y), rb_float_new(_z));
                     }
                     else
                     {
-                        rb_yield_values(4, rb_float_new(octave_noise_3d(n, p, 1.0, _x, _y, _z)), rb_float_new(_x), rb_float_new(_y), rb_float_new(_z));
+                        rb_yield_values(4, rb_float_new(octave_noise_4d(n, p, 1.0, _x, _y, _z, seed * SEED_OFFSET)),
+                                        rb_float_new(_x), rb_float_new(_y), rb_float_new(_z));
                     }
 
                     _z += _interval;
@@ -257,7 +263,7 @@ VALUE Perlin_Generator_chunk3d(const VALUE self, const VALUE x, const VALUE y, c
                     }
                     else
                     {
-                        rb_ary_push(column, rb_float_new(octave_noise_3d(n, p, 1.0, _x, _y, _z)));
+                        rb_ary_push(column, rb_float_new(octave_noise_4d(n, p, 1.0, _x, _y, _z, seed * SEED_OFFSET)));
                     }
 
                     _z += _interval;
