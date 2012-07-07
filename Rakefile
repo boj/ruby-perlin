@@ -17,7 +17,7 @@ CLOBBER << "coverage"
 
 # somewhere in your Rakefile, define your gem spec
 spec = Gem::Specification.new do |s|
-  s.name = 'ruby-perlin'
+  s.name = 'perlin'
   s.version = Perlin::VERSION
   s.date = Time.now.strftime '%Y-%m-%d'
   s.authors = ["Brian 'bojo' Jones", 'Camille Goudeseune', 'Bil Bas']
@@ -26,12 +26,8 @@ spec = Gem::Specification.new do |s|
   s.description = <<-END
 #{s.summary}
 
-A Perlin noise implementation based of
+A Perlin/Simplex noise implementation based of
 <http://freespace.virgin.net/hugo.elias/models/m_perlin.htm>. Implemented as a Ruby C extension.
-
-Written by Brian 'bojo' Jones (mojobojo@gmail.com)
-Optimizations thanks to Camille Goudeseune, Univ of Illinois, (cog@illinois.edu)
-Made into gem by Bil Bas (bil.bagpuss@gmail.com)
   END
 
   s.email = %w<mojobojo@gmail.com>
