@@ -76,7 +76,7 @@ end
 
 desc "Create platform-specific compiled gem"
 task :native_gem do
-  system "rake native gem"
+  Rake::Task["native"].invoke "gem"
 end
 
 desc "Run benchmarks"
