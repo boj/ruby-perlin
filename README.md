@@ -10,6 +10,8 @@ By default, the noise generated uses Perlin's Simplex functions, but can produce
 If a large number of noise values are required, requesting chunks of values can be faster, which can then be iterated
 through at leisure (or use the block version of #chunk).
 
+- [Benchmarks](https://github.com/Spooner/ruby-perlin/blob/master/bench/benchmarks.txt)
+
 CREDITS
 -------
 
