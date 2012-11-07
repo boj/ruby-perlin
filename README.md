@@ -1,3 +1,7 @@
+## Note - November 7th, 2012
+
+This code has been extended, packaged as a gem, and maintained by Bil Bas [here](https://github.com/Spooner/ruby-perlin).
+
 # Ruby Perlin
 
 A Ruby Perlin implementation based off
